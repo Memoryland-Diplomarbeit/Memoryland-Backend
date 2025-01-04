@@ -9,13 +9,6 @@ namespace Persistence;
 
 public class ApplicationDbContext : DbContext
 {
-    private readonly ILogger<ApplicationDbContext> _logger;
-
-    public ApplicationDbContext(ILogger<ApplicationDbContext> logger)
-    {
-        _logger = logger;
-    }
-
     public DbSet<User> Users { get; set; }
     public DbSet<PhotoAlbum> PhotoAlbums { get; set; }
     public DbSet<Photo> Photos { get; set; }
@@ -28,16 +21,17 @@ public class ApplicationDbContext : DbContext
         if (optionsBuilder.IsConfigured) return;
         
         var configuration = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
             .AddUserSecrets<ApplicationDbContext>()
             .Build();
         
         var useLocalDbIsValidValue = bool.TryParse(
             configuration["UseLocalDb"], 
             out var useLocalDb);
-
+        
         if (useLocalDbIsValidValue && useLocalDb)
         {
-            _logger.Log(LogLevel.Information, "Using 'DefaultLocal' connection string");
             optionsBuilder
                 .LogTo(
                     msg => Debug.WriteLine(msg),
@@ -47,7 +41,6 @@ public class ApplicationDbContext : DbContext
         }
         else
         {
-            _logger.Log(LogLevel.Information, "Using 'Default' connection string");
             optionsBuilder
                 .LogTo(
                     msg => Debug.WriteLine(msg),

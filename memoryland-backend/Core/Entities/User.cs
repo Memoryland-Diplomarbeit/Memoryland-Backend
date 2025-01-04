@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Core.Entities;
 
 #nullable disable
-[Index(nameof(Email), IsUnique = true), Index(nameof(Username), IsUnique = true)]
+[Index(nameof(Email), IsUnique = true)]
 public class User : BaseEntity
 {
     [Required, MaxLength(50)]
