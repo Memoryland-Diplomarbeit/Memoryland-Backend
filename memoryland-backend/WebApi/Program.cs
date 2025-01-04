@@ -1,3 +1,4 @@
+using BlobStoragePersistence;
 using Persistence;
 using WebApi.Service;
 
@@ -9,6 +10,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddSingleton<BlobStoragePhotoService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddCors(options =>
