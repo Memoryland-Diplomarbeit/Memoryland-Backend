@@ -1,4 +1,5 @@
 using Persistence;
+using WebApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Configuration.AddUserSecrets<Program>();
@@ -8,6 +9,7 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
+builder.Services.AddScoped<UserService>();
 
 builder.Services.AddCors(options =>
 {
