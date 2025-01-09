@@ -64,7 +64,8 @@ public class PhotoController : ApiControllerBase
             .FirstOrDefaultAsync(p => 
                 p.PhotoAlbumId == albumId && p.Name == photoName);
 
-        if (photo == null) return TypedResults.NotFound();
+        if (photo == null) 
+            return TypedResults.NotFound();
         
         if (!photo.PhotoAlbum.User.Email.Equals(
                 email, 
