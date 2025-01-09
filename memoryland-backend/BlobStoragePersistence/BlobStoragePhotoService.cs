@@ -55,12 +55,12 @@ public class BlobStoragePhotoService
     }
 
     public async Task<Uri?> GetPhoto(
-        string blobClientName, 
+        long userId, 
         string albumName, 
         string photoName)
     {
         var containerClient = BlobSvcClient
-            .GetBlobContainerClient(blobClientName);
+            .GetBlobContainerClient(PadBlobClientName(userId));
 
         if (!await containerClient.ExistsAsync()) return null;
         
@@ -74,5 +74,12 @@ public class BlobStoragePhotoService
                 blobClient,
                 AccessKey);
 
+    }
+    
+    private string PadBlobClientName(long blobClientName)
+    {
+        return blobClientName.ToString().PadLeft(
+            long.MaxValue.ToString().Length, 
+            '0');
     }
 }
