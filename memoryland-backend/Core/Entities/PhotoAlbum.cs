@@ -12,7 +12,7 @@ public class PhotoAlbum : BaseEntity
     
     public User User { get; set; }
     
-    public int UserId { get; set; }
+    public long UserId { get; set; }
     
     public ICollection<Photo> Photos { get; set; }
 }

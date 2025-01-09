@@ -21,5 +21,5 @@ public class MemorylandToken : BaseEntity
     
     public Memoryland Memoryland { get; set; }
     
-    public int MemorylandId { get; set; }
+    public long MemorylandId { get; set; }
 }

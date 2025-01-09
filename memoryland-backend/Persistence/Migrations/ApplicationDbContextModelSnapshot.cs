@@ -30,10 +30,7 @@ namespace Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("MemorylandTypeId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("MemorylandTypeId1")
+                    b.Property<long>("MemorylandTypeId")
                         .HasColumnType("bigint");
 
                     b.Property<string>("Name")
@@ -41,20 +38,17 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("UserId1")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemorylandTypeId1");
+                    b.HasIndex("MemorylandTypeId");
 
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("Memorylands");
                 });
@@ -67,16 +61,10 @@ namespace Persistence.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
 
-                    b.Property<int>("MemorylandId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("MemorylandId1")
+                    b.Property<long>("MemorylandId")
                         .HasColumnType("bigint");
 
-                    b.Property<int>("PhotoId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("PhotoId1")
+                    b.Property<long>("PhotoId")
                         .HasColumnType("bigint");
 
                     b.Property<int>("Position")
@@ -84,9 +72,9 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemorylandId1");
+                    b.HasIndex("MemorylandId");
 
-                    b.HasIndex("PhotoId1");
+                    b.HasIndex("PhotoId");
 
                     b.HasIndex("Position", "MemorylandId")
                         .IsUnique();
@@ -105,18 +93,16 @@ namespace Persistence.Migrations
                     b.Property<bool>("IsInternal")
                         .HasColumnType("boolean");
 
-                    b.Property<int>("MemorylandId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("MemorylandId1")
+                    b.Property<long>("MemorylandId")
                         .HasColumnType("bigint");
 
                     b.Property<Guid>("Token")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("MemorylandId1");
+                    b.HasIndex("MemorylandId");
 
                     b.HasIndex("Token")
                         .IsUnique();
@@ -165,15 +151,12 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("PhotoAlbumId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("PhotoAlbumId1")
+                    b.Property<long>("PhotoAlbumId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("PhotoAlbumId1");
+                    b.HasIndex("PhotoAlbumId");
 
                     b.HasIndex("Name", "PhotoAlbumId")
                         .IsUnique();
@@ -194,10 +177,7 @@ namespace Persistence.Migrations
                         .HasMaxLength(50)
                         .HasColumnType("character varying(50)");
 
-                    b.Property<int>("UserId")
-                        .HasColumnType("integer");
-
-                    b.Property<long?>("UserId1")
+                    b.Property<long>("UserId")
                         .HasColumnType("bigint");
 
                     b.HasKey("Id");
@@ -205,7 +185,7 @@ namespace Persistence.Migrations
                     b.HasIndex("Name")
                         .IsUnique();
 
-                    b.HasIndex("UserId1");
+                    b.HasIndex("UserId");
 
                     b.ToTable("PhotoAlbums");
                 });
@@ -240,11 +220,15 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Core.Entities.MemorylandType", "MemorylandType")
                         .WithMany()
-                        .HasForeignKey("MemorylandTypeId1");
+                        .HasForeignKey("MemorylandTypeId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Entities.User", "User")
                         .WithMany("Memorylands")
-                        .HasForeignKey("UserId1");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("MemorylandType");
 
@@ -255,11 +239,15 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Core.Entities.Memoryland", "Memoryland")
                         .WithMany("MemorylandConfigurations")
-                        .HasForeignKey("MemorylandId1");
+                        .HasForeignKey("MemorylandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.HasOne("Core.Entities.Photo", "Photo")
                         .WithMany()
-                        .HasForeignKey("PhotoId1");
+                        .HasForeignKey("PhotoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Memoryland");
 
@@ -270,7 +258,9 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Core.Entities.Memoryland", "Memoryland")
                         .WithMany("MemorylandTokens")
-                        .HasForeignKey("MemorylandId1");
+                        .HasForeignKey("MemorylandId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("Memoryland");
                 });
@@ -279,7 +269,9 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Core.Entities.PhotoAlbum", "PhotoAlbum")
                         .WithMany("Photos")
-                        .HasForeignKey("PhotoAlbumId1");
+                        .HasForeignKey("PhotoAlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("PhotoAlbum");
                 });
@@ -288,7 +280,9 @@ namespace Persistence.Migrations
                 {
                     b.HasOne("Core.Entities.User", "User")
                         .WithMany("PhotoAlbums")
-                        .HasForeignKey("UserId1");
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("User");
                 });

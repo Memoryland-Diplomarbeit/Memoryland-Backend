@@ -12,11 +12,11 @@ public class Memoryland : BaseEntity
     
     public MemorylandType MemorylandType { get; set; }
     
-    public int MemorylandTypeId { get; set; }
+    public long MemorylandTypeId { get; set; }
     
     public User User { get; set; }
     
-    public int UserId { get; set; }
+    public long UserId { get; set; }
     
     public ICollection<MemorylandConfiguration> MemorylandConfigurations { get; set; }
     

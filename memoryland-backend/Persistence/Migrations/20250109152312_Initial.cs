@@ -47,24 +47,24 @@ namespace Persistence.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    MemorylandTypeId1 = table.Column<long>(type: "bigint", nullable: true),
-                    MemorylandTypeId = table.Column<int>(type: "integer", nullable: false),
-                    UserId1 = table.Column<long>(type: "bigint", nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    MemorylandTypeId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Memorylands", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Memorylands_MemorylandTypes_MemorylandTypeId1",
-                        column: x => x.MemorylandTypeId1,
+                        name: "FK_Memorylands_MemorylandTypes_MemorylandTypeId",
+                        column: x => x.MemorylandTypeId,
                         principalTable: "MemorylandTypes",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Memorylands_Users_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_Memorylands_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -74,17 +74,17 @@ namespace Persistence.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    UserId1 = table.Column<long>(type: "bigint", nullable: true),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_PhotoAlbums", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_PhotoAlbums_Users_UserId1",
-                        column: x => x.UserId1,
+                        name: "FK_PhotoAlbums_Users_UserId",
+                        column: x => x.UserId,
                         principalTable: "Users",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -95,17 +95,17 @@ namespace Persistence.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Token = table.Column<Guid>(type: "uuid", nullable: false),
                     IsInternal = table.Column<bool>(type: "boolean", nullable: false),
-                    MemorylandId1 = table.Column<long>(type: "bigint", nullable: true),
-                    MemorylandId = table.Column<int>(type: "integer", nullable: false)
+                    MemorylandId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MemorylandTokens", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MemorylandTokens_Memorylands_MemorylandId1",
-                        column: x => x.MemorylandId1,
+                        name: "FK_MemorylandTokens_Memorylands_MemorylandId",
+                        column: x => x.MemorylandId,
                         principalTable: "Memorylands",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -115,17 +115,17 @@ namespace Persistence.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    PhotoAlbumId1 = table.Column<long>(type: "bigint", nullable: true),
-                    PhotoAlbumId = table.Column<int>(type: "integer", nullable: false)
+                    PhotoAlbumId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Photos", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Photos_PhotoAlbums_PhotoAlbumId1",
-                        column: x => x.PhotoAlbumId1,
+                        name: "FK_Photos_PhotoAlbums_PhotoAlbumId",
+                        column: x => x.PhotoAlbumId,
                         principalTable: "PhotoAlbums",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateTable(
@@ -135,35 +135,35 @@ namespace Persistence.Migrations
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Position = table.Column<int>(type: "integer", nullable: false),
-                    MemorylandId1 = table.Column<long>(type: "bigint", nullable: true),
-                    MemorylandId = table.Column<int>(type: "integer", nullable: false),
-                    PhotoId1 = table.Column<long>(type: "bigint", nullable: true),
-                    PhotoId = table.Column<int>(type: "integer", nullable: false)
+                    MemorylandId = table.Column<long>(type: "bigint", nullable: false),
+                    PhotoId = table.Column<long>(type: "bigint", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_MemorylandConfigurations", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_MemorylandConfigurations_Memorylands_MemorylandId1",
-                        column: x => x.MemorylandId1,
+                        name: "FK_MemorylandConfigurations_Memorylands_MemorylandId",
+                        column: x => x.MemorylandId,
                         principalTable: "Memorylands",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_MemorylandConfigurations_Photos_PhotoId1",
-                        column: x => x.PhotoId1,
+                        name: "FK_MemorylandConfigurations_Photos_PhotoId",
+                        column: x => x.PhotoId,
                         principalTable: "Photos",
-                        principalColumn: "Id");
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemorylandConfigurations_MemorylandId1",
+                name: "IX_MemorylandConfigurations_MemorylandId",
                 table: "MemorylandConfigurations",
-                column: "MemorylandId1");
+                column: "MemorylandId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemorylandConfigurations_PhotoId1",
+                name: "IX_MemorylandConfigurations_PhotoId",
                 table: "MemorylandConfigurations",
-                column: "PhotoId1");
+                column: "PhotoId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MemorylandConfigurations_Position_MemorylandId",
@@ -172,9 +172,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Memorylands_MemorylandTypeId1",
+                name: "IX_Memorylands_MemorylandTypeId",
                 table: "Memorylands",
-                column: "MemorylandTypeId1");
+                column: "MemorylandTypeId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Memorylands_Name",
@@ -183,9 +183,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Memorylands_UserId1",
+                name: "IX_Memorylands_UserId",
                 table: "Memorylands",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MemorylandTokens_IsInternal_MemorylandId",
@@ -194,9 +194,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_MemorylandTokens_MemorylandId1",
+                name: "IX_MemorylandTokens_MemorylandId",
                 table: "MemorylandTokens",
-                column: "MemorylandId1");
+                column: "MemorylandId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_MemorylandTokens_Token",
@@ -217,9 +217,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhotoAlbums_UserId1",
+                name: "IX_PhotoAlbums_UserId",
                 table: "PhotoAlbums",
-                column: "UserId1");
+                column: "UserId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Photos_Name_PhotoAlbumId",
@@ -228,9 +228,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_Photos_PhotoAlbumId1",
+                name: "IX_Photos_PhotoAlbumId",
                 table: "Photos",
-                column: "PhotoAlbumId1");
+                column: "PhotoAlbumId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",

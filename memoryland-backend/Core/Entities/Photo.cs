@@ -12,5 +12,5 @@ public class Photo : BaseEntity
     
     public PhotoAlbum PhotoAlbum { get; set; }
     
-    public int PhotoAlbumId { get; set; }
+    public long PhotoAlbumId { get; set; }
 }

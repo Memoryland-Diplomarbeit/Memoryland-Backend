@@ -12,9 +12,9 @@ public class MemorylandConfiguration : BaseEntity
     
     public Memoryland Memoryland { get; set; }
     
-    public int MemorylandId { get; set; }
+    public long MemorylandId { get; set; }
     
     public Photo Photo { get; set; }
     
-    public int PhotoId { get; set; }
+    public long PhotoId { get; set; }
 }
