@@ -17,7 +17,7 @@ builder.Services.AddControllers();
 
 builder.Services.AddDbContext<ApplicationDbContext>();
 builder.Services.AddSingleton<BlobStoragePhotoService>();
-builder.Services.AddSingleton<AuthorizationService>();
+builder.Services.AddScoped<AuthorizationService>();
 builder.Services.AddScoped<UserService>();
 
 builder.Services.AddCors(options =>
