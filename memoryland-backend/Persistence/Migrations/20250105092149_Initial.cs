@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore.Migrations;
+﻿using System;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
 #nullable disable
@@ -87,6 +88,27 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "MemorylandTokens",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    Token = table.Column<Guid>(type: "uuid", nullable: false),
+                    IsInternal = table.Column<bool>(type: "boolean", nullable: false),
+                    MemorylandId1 = table.Column<long>(type: "bigint", nullable: true),
+                    MemorylandId = table.Column<int>(type: "integer", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_MemorylandTokens", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_MemorylandTokens_Memorylands_MemorylandId1",
+                        column: x => x.MemorylandId1,
+                        principalTable: "Memorylands",
+                        principalColumn: "Id");
+                });
+
+            migrationBuilder.CreateTable(
                 name: "Photos",
                 columns: table => new
                 {
@@ -112,7 +134,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Position = table.Column<int>(type: "integer", maxLength: 50, nullable: false),
+                    Position = table.Column<int>(type: "integer", nullable: false),
                     MemorylandId1 = table.Column<long>(type: "bigint", nullable: true),
                     MemorylandId = table.Column<int>(type: "integer", nullable: false),
                     PhotoId1 = table.Column<long>(type: "bigint", nullable: true),
@@ -166,6 +188,23 @@ namespace Persistence.Migrations
                 column: "UserId1");
 
             migrationBuilder.CreateIndex(
+                name: "IX_MemorylandTokens_IsInternal_MemorylandId",
+                table: "MemorylandTokens",
+                columns: new[] { "IsInternal", "MemorylandId" },
+                unique: true);
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MemorylandTokens_MemorylandId1",
+                table: "MemorylandTokens",
+                column: "MemorylandId1");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_MemorylandTokens_Token",
+                table: "MemorylandTokens",
+                column: "Token",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_MemorylandTypes_Name",
                 table: "MemorylandTypes",
                 column: "Name",
@@ -207,16 +246,19 @@ namespace Persistence.Migrations
                 name: "MemorylandConfigurations");
 
             migrationBuilder.DropTable(
-                name: "Memorylands");
+                name: "MemorylandTokens");
 
             migrationBuilder.DropTable(
                 name: "Photos");
 
             migrationBuilder.DropTable(
-                name: "MemorylandTypes");
+                name: "Memorylands");
 
             migrationBuilder.DropTable(
                 name: "PhotoAlbums");
+
+            migrationBuilder.DropTable(
+                name: "MemorylandTypes");
 
             migrationBuilder.DropTable(
                 name: "Users");

@@ -7,7 +7,7 @@ namespace Core.Entities;
 [Index(nameof(Position), nameof(MemorylandId), IsUnique = true)]
 public class MemorylandConfiguration : BaseEntity
 {
-    [Required, MaxLength(50)]
+    [Required]
     public int Position { get; set; }
     
     public Memoryland Memoryland { get; set; }

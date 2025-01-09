@@ -19,4 +19,6 @@ public class Memoryland : BaseEntity
     public int UserId { get; set; }
     
     public ICollection<MemorylandConfiguration> MemorylandConfigurations { get; set; }
+    
+    public ICollection<MemorylandToken> MemorylandTokens { get; set; }
 }

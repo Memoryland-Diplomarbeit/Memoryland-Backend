@@ -13,6 +13,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<PhotoAlbum> PhotoAlbums { get; set; }
     public DbSet<Photo> Photos { get; set; }
     public DbSet<Memoryland> Memorylands { get; set; }
+    public DbSet<MemorylandToken> MemorylandTokens { get; set; }
     public DbSet<MemorylandType> MemorylandTypes { get; set; }
     public DbSet<MemorylandConfiguration> MemorylandConfigurations { get; set; }
     
