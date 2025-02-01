@@ -37,9 +37,12 @@ public class PhotoController : ApiControllerBase
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
         
-        // check if the user exists and if there are any
-        // photos at all, for performance
-        if (user == null || !Context.Photos.Any()) 
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any photos at all, for performance
+        if (!Context.Photos.Any()) 
             return TypedResults.NotFound();
         
         if (!Context.PhotoAlbums.Any(pa => pa.Id == albumId))

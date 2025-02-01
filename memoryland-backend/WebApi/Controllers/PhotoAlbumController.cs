@@ -37,9 +37,12 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
         
-        // check if the user exists and if there are any
-        // photos at all, for performance
-        if (user == null || !Context.Photos.Any()) 
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any photos at all, for performance
+        if (!Context.Photos.Any()) 
             return TypedResults.NotFound();
         
         if (!Context.PhotoAlbums.Any(pa => pa.Id == albumId))
@@ -124,5 +127,33 @@ public class PhotoAlbumController : ApiControllerBase
         await Context.SaveChangesAsync();
         
         return TypedResults.Created();
+    }
+
+    [HttpGet]
+    [Authorize]
+    [RequiredScope("backend.read")]
+    public async Task<Results<NotFound, Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
+        GetPhotoAlbumsData()
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+
+        var photoAlbums = Context.PhotoAlbums
+            .Where(pa => pa.UserId == user.Id)
+            .Include(pa => pa.Photos)
+            .Select(pa => new PhotoAlbumDto(
+                pa.Id, 
+                pa.Name, 
+                pa.Photos.Select(p => p.Name)))
+            .ToList();
+
+        if (!photoAlbums.Any())
+            return TypedResults.NotFound();
+
+        return TypedResults.Ok(photoAlbums);
     }
 }
