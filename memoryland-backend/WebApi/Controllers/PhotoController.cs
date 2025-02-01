@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using BlobStoragePersistence;
 using Core.DTO;
 using Microsoft.AspNetCore.Authorization;
@@ -7,6 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Identity.Web.Resource;
 using Persistence;
+using WebApi.Service;
 
 namespace WebApi.Controllers;
 
@@ -14,17 +14,16 @@ public class PhotoController : ApiControllerBase
 {
     private ApplicationDbContext Context { get; }
     private BlobStoragePhotoService PhotoSvc { get; }
-
-    private IHttpContextAccessor ContextAccessor { get; }
+    private UserService UserSvc { get; }
 
     public PhotoController(
         ApplicationDbContext context, 
         BlobStoragePhotoService photoService, 
-        IHttpContextAccessor contextAccessor)
+        UserService userService)
     {
         Context = context;
         PhotoSvc = photoService;
-        ContextAccessor = contextAccessor;
+        UserSvc = userService;
     }
     
     [HttpGet]
@@ -32,22 +31,11 @@ public class PhotoController : ApiControllerBase
     [Authorize]
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<PhotoDto>, BadRequest<string>, UnauthorizedHttpResult>> GetImageWithDetails(
-        int albumId,
+        long albumId,
         string photoName)
     {
         // check if the user is authenticated without errors
-        var email = User.Claims
-            .FirstOrDefault(c => c.Type.Equals(
-                "email", 
-                StringComparison.CurrentCultureIgnoreCase))
-            ?.Value;
-        
-        if (email == null)
-            throw new AuthenticationException("User email not found.");
-        
-        var user = await Context.Users
-            .FirstOrDefaultAsync(u => 
-                u.Username.Equals(email));
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
         
         // check if the user exists and if there are any
         // photos at all, for performance
@@ -68,7 +56,7 @@ public class PhotoController : ApiControllerBase
             return TypedResults.NotFound();
         
         if (!photo.PhotoAlbum.User.Email.Equals(
-                email, 
+                user.Email, 
                 StringComparison.CurrentCultureIgnoreCase))
             return TypedResults.Unauthorized();
         

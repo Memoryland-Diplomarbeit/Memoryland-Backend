@@ -1,5 +1,7 @@
+using System.Security.Authentication;
 using System.Security.Claims;
 using Core.Entities;
+using Microsoft.EntityFrameworkCore;
 using Persistence;
 
 namespace WebApi.Service;
@@ -49,5 +51,23 @@ public class UserService
         await Context.AddAsync(user);
         await Context.SaveChangesAsync();
         return true;
+    }
+
+    public async Task<User?> CheckIfUserAuthenticated(IEnumerable<Claim> claims)
+    {
+        var email = claims
+            .FirstOrDefault(c => c.Type.Equals(
+                "email", 
+                StringComparison.CurrentCultureIgnoreCase))
+            ?.Value;
+        
+        if (email == null)
+            throw new AuthenticationException("User email not found.");
+        
+        var user = await Context.Users
+            .FirstOrDefaultAsync(u => 
+                u.Username.Equals(email));
+
+        return user;
     }
 }
