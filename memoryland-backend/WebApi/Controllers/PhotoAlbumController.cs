@@ -1,5 +1,6 @@
 using BlobStoragePersistence;
 using Core.DTO;
+using Core.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
@@ -12,6 +13,7 @@ namespace WebApi.Controllers;
 
 public class PhotoAlbumController : ApiControllerBase
 {
+    private static string ReservedCharacters { get; } = "!*'();:@&=+$,/?#[]";
     private ApplicationDbContext Context { get; }
     private BlobStoragePhotoService PhotoSvc { get; }
     private UserService UserSvc { get; }
@@ -80,5 +82,47 @@ public class PhotoAlbumController : ApiControllerBase
             string.Compare(a.Name, b.Name, StringComparison.Ordinal));
             
         return TypedResults.Ok(photos.AsEnumerable());
+    }
+
+    [HttpPost]
+    [Authorize]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Created, BadRequest<string>>> CreatePhotoAlbum(string albumName)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null) 
+            return TypedResults.BadRequest("User not found");
+        
+        // check if the album name is valid
+        if (string.IsNullOrWhiteSpace(albumName))
+            return TypedResults.BadRequest("Album name is required");
+        
+        if (albumName.Length > 1024)
+            return TypedResults.BadRequest("An Album name can't be longer than 1024 characters");
+        
+        // check if the album name doesn't contain invalid characters
+        
+
+        if (albumName.Any(c => ReservedCharacters.Contains(c)))
+            return TypedResults.BadRequest("Album name contains invalid characters");
+        
+        // check if the album name is unique
+        if (Context.PhotoAlbums.Any(pa => 
+            pa.Name.Equals(albumName, StringComparison.Ordinal)))
+            return TypedResults.BadRequest("Album name already exists");
+        
+        var photoAlbum = new PhotoAlbum
+        {
+            Name = albumName,
+            UserId = user.Id
+        };
+
+        await Context.PhotoAlbums.AddAsync(photoAlbum);
+        await Context.SaveChangesAsync();
+        
+        return TypedResults.Created();
     }
 }
