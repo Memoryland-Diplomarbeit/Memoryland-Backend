@@ -22,25 +22,27 @@ public class UserService
     /// </summary>
     /// <param name="claims"></param>
     /// <returns></returns>
-    public async Task<bool> CreateUserIfNotExist(IEnumerable<Claim> claims)
+    private async Task<User?> CreateUserIfNotExist(IEnumerable<Claim> claims)
     {
         var enumerable = claims.ToList();
         var email = enumerable
             .FirstOrDefault(c => c.Type == "email")?.Value;
         
         if (string.IsNullOrEmpty(email))
-            return false;
+            return null;
 
-        if (Context.Users.Any(u => u.Email == email))
-            return true;
+        var user = Context.Users.FirstOrDefault(u => u.Email == email);
+        
+        if (user != null)
+            return user;
         
         var username = enumerable
             .FirstOrDefault(c => c.Type == "name")?.Value;
         
         if (string.IsNullOrEmpty(username))
-            return false;
+            return null;
         
-        var user = new User
+        user = new User
         {
             Email = email,
             Username = username,
@@ -50,12 +52,15 @@ public class UserService
         
         await Context.AddAsync(user);
         await Context.SaveChangesAsync();
-        return true;
+        
+        return Context.Users.FirstOrDefault(u => u.Email == email);
     }
 
-    public async Task<User?> CheckIfUserAuthenticated(IEnumerable<Claim> claims)
+    public async Task<User?> CheckIfUserAuthenticated(IEnumerable<Claim> claims, bool createUserIfNotExist = false)
     {
-        var email = claims
+        var claimList = claims.ToList();
+        
+        var email = claimList
             .FirstOrDefault(c => c.Type.Equals(
                 "emails", 
                 StringComparison.CurrentCultureIgnoreCase))
@@ -63,6 +68,9 @@ public class UserService
         
         if (email == null)
             throw new AuthenticationException("User email not found.");
+
+        if (createUserIfNotExist)
+            return await CreateUserIfNotExist(claimList); // needs all claims to get the name too
         
         var user = await Context.Users
             .FirstOrDefaultAsync(u => u.Username == email);

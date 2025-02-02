@@ -93,11 +93,12 @@ public class PhotoAlbumController : ApiControllerBase
     public async Task<Results<Created, BadRequest<string>>> CreatePhotoAlbum(string albumName)
     {
         // check if the user is authenticated without errors
-        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
         
         // check if the user exists
         if (user == null) 
-            return TypedResults.BadRequest("User not found");
+            // if user was not able created then the claims had an issue meaning unauthorized
+            throw new UnauthorizedAccessException(); 
         
         // check if the album name is valid
         if (string.IsNullOrWhiteSpace(albumName))
