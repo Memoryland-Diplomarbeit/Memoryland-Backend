@@ -132,7 +132,7 @@ public class PhotoAlbumController : ApiControllerBase
     [HttpGet]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
+    public async Task<Results<Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
         GetPhotoAlbumsData()
     {
         // check if the user is authenticated without errors
@@ -140,7 +140,8 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the user exists
         if (user == null)
-            return TypedResults.Unauthorized();
+            return TypedResults.Ok(new List<PhotoAlbumDto>());
+            // would throw an exception if the user were not allowed
 
         var photoAlbums = Context.PhotoAlbums
             .Where(pa => pa.UserId == user.Id)
@@ -150,9 +151,6 @@ public class PhotoAlbumController : ApiControllerBase
                 pa.Name, 
                 pa.Photos.Select(p => p.Name)))
             .ToList();
-
-        if (!photoAlbums.Any())
-            return TypedResults.NotFound();
 
         return TypedResults.Ok(photoAlbums);
     }

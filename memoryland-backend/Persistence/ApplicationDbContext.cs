@@ -33,6 +33,7 @@ public class ApplicationDbContext : DbContext
         
         if (useLocalDbIsValidValue && useLocalDb)
         {
+            Console.WriteLine("Using the DefaultLocal connection string.");
             optionsBuilder
                 .LogTo(
                     msg => Debug.WriteLine(msg),
@@ -42,6 +43,7 @@ public class ApplicationDbContext : DbContext
         }
         else
         {
+            Console.WriteLine("Using the Default connection string.");
             optionsBuilder
                 .LogTo(
                     msg => Debug.WriteLine(msg),

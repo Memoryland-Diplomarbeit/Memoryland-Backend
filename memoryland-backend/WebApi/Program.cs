@@ -1,13 +1,19 @@
 using System.IdentityModel.Tokens.Jwt;
 using BlobStoragePersistence;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Azure;
 using Microsoft.Identity.Web;
 using Persistence;
 using WebApi.Service;
 
 var builder = WebApplication.CreateBuilder(args);
-builder.Configuration.AddUserSecrets<Program>();
+
+// build configuration
+builder.Configuration
+    .SetBasePath(Directory.GetCurrentDirectory())
+    .AddUserSecrets<Program>()
+    .AddUserSecrets<BlobStoragePhotoService>();
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
@@ -68,6 +74,15 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
+using (var scope = app.Services.CreateScope())
+{
+    // Load the db connection once, to get the log message, which db I am connected to
+    var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+    var connection = dbContext.Database.GetDbConnection();
+    
+    Console.WriteLine($"Connected to database: {connection.Database}");
+}
+
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
@@ -75,10 +90,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
+app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.UseCors("AllowAll");
 app.UseHsts();
 app.UseHttpsRedirection();
 

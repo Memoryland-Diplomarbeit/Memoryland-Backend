@@ -57,7 +57,7 @@ public class UserService
     {
         var email = claims
             .FirstOrDefault(c => c.Type.Equals(
-                "email", 
+                "emails", 
                 StringComparison.CurrentCultureIgnoreCase))
             ?.Value;
         
@@ -65,8 +65,7 @@ public class UserService
             throw new AuthenticationException("User email not found.");
         
         var user = await Context.Users
-            .FirstOrDefaultAsync(u => 
-                u.Username.Equals(email));
+            .FirstOrDefaultAsync(u => u.Username == email);
 
         return user;
     }
