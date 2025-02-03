@@ -32,7 +32,7 @@ public class PhotoAlbumController : ApiControllerBase
     [Route("{albumId:int}")]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<IEnumerable<PhotoDto>>, BadRequest<string>, UnauthorizedHttpResult>> GetImageWithDetails(long albumId)
+    public async Task<Results<NotFound, Ok<IEnumerable<PhotoDto>>, BadRequest<string>, UnauthorizedHttpResult>> GetPhotoAlbumImagesWithDetails(long albumId)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -98,7 +98,7 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the user exists
         if (user == null) 
             // if user was not able created then the claims had an issue meaning unauthorized
-            throw new UnauthorizedAccessException(); 
+            throw new UnauthorizedAccessException();
         
         // check if the album name is valid
         if (string.IsNullOrWhiteSpace(albumName))
@@ -108,8 +108,6 @@ public class PhotoAlbumController : ApiControllerBase
             return TypedResults.BadRequest("An Album name can't be longer than 1024 characters");
         
         // check if the album name doesn't contain invalid characters
-        
-
         if (albumName.Any(c => ReservedCharacters.Contains(c)))
             return TypedResults.BadRequest("Album name contains invalid characters");
         
