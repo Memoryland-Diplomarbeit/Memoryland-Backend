@@ -1,4 +1,5 @@
 using Azure.Storage.Blobs;
+using Azure.Storage.Blobs.Models;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
@@ -42,8 +43,8 @@ public class BlobStoragePhotoService
     }
 
     public async Task UploadPhoto(
-        string blobContainerName, 
-        string albumName, 
+        long userId, 
+        long photoId, 
         string photoName, 
         byte[] photoBytes)
     {
@@ -53,11 +54,11 @@ public class BlobStoragePhotoService
             photo = RotateImage(photoBytes); // rotate images if needed
         
         var containerClient = BlobSvcClient
-            .GetBlobContainerClient(blobContainerName);
+            .GetBlobContainerClient(PadLong(userId));
         await containerClient.CreateIfNotExistsAsync();
 
-        var blobClient = containerClient.GetBlobClient(
-            $"{albumName}/{photoName}");
+        var blobClient = containerClient
+            .GetBlobClient(PadLong(photoId));
 
         using var stream = new MemoryStream(photo);
         await blobClient.UploadAsync(stream, overwrite: true);
@@ -65,16 +66,14 @@ public class BlobStoragePhotoService
 
     public async Task<Uri?> GetPhoto(
         long userId, 
-        string albumName, 
-        string photoName)
+        long photoId)
     {
         var containerClient = BlobSvcClient
-            .GetBlobContainerClient(PadBlobClientName(userId));
+            .GetBlobContainerClient(PadLong(userId));
 
         if (!await containerClient.ExistsAsync()) return null;
         
-        var blobClient = containerClient.GetBlobClient(
-            $"{albumName}/{photoName}");
+        var blobClient = containerClient.GetBlobClient(PadLong(photoId));
 
         if (!await blobClient.ExistsAsync()) return null;
         
@@ -82,17 +81,16 @@ public class BlobStoragePhotoService
             .CreateUserDelegationSasBlob(
                 blobClient,
                 AccessKey);
-
     }
     
-    private string PadBlobClientName(long blobClientName)
+    private static string PadLong(long number)
     {
-        return blobClientName.ToString().PadLeft(
-            long.MaxValue.ToString().Length, 
-            '0');
+        return number.ToString().PadLeft(
+            20, 
+            '0'); //long.MaxValue.ToString().Length + 1 reserve
     }
     
-    static byte[] RotateImage(byte[] imageBytes)
+    private static byte[] RotateImage(byte[] imageBytes)
     {
         using var inputStream = new MemoryStream(imageBytes);
         var options = new DecoderOptions();
@@ -105,7 +103,7 @@ public class BlobStoragePhotoService
         return outputStream.ToArray();
     }
 
-    static void ApplyExifRotation(Image image)
+    private static void ApplyExifRotation(Image image)
     {
         if (image.Metadata.ExifProfile == null) return; // Performance
         

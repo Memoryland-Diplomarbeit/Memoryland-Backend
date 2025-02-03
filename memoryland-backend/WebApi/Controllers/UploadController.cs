@@ -104,8 +104,8 @@ public class UploadController : ApiControllerBase
             .FirstOrDefault(pa => pa.Id == photo.PhotoAlbumId);
         
         await PhotoSvc.UploadPhoto(
-            album!.User.Username,
-            album.Name,
+            album!.User.Id,
+            photo.Id,
             photo.Name,
             photoData);
         

@@ -66,8 +66,7 @@ public class PhotoController : ApiControllerBase
         // get the photo uri from the blob storage
         var uri = await PhotoSvc.GetPhoto(
             user.Id,
-            photo.PhotoAlbum.Name,
-            photo.Name);
+            photo.Id);
         
         if (uri == null) 
             return TypedResults.NotFound();
