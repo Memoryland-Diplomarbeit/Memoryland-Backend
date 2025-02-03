@@ -78,4 +78,46 @@ public class PhotoController : ApiControllerBase
             
         return TypedResults.Ok(photoDto);
     }
+    
+    
+    [HttpPut]
+    [Authorize]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Ok, BadRequest<string>>> EditPhotoName(EditNameDto editNameDto)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
+        
+        // check if the user exists
+        if (user == null) 
+            // if user was not able created then the claims had an issue meaning unauthorized
+            throw new UnauthorizedAccessException();
+        
+        var oldPhoto = Context.Photos.FirstOrDefault(p => 
+            p.Id == editNameDto.OldId);
+        
+        if (oldPhoto == null)
+            return TypedResults.BadRequest("Original photo doesn't exist");
+        
+        // check if the photo name is valid
+        if (string.IsNullOrWhiteSpace(editNameDto.NewName))
+            return TypedResults.BadRequest("FileName name is required");
+        
+        if (editNameDto.NewName.Length < 3 || editNameDto.NewName.Length > 63)
+            return TypedResults.BadRequest("A FileName name can't be longer than 63 characters or shorter than 3");
+        
+        // check if the album name doesn't contain invalid characters
+        if (!UploadController.ContainerNameRegex.IsMatch(editNameDto.NewName))
+            return TypedResults.BadRequest("FileName name contains invalid characters");
+        
+        // check if the album name is unique
+        if (Context.Photos.Any(p => 
+                p.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
+                p.PhotoAlbumId.Equals(oldPhoto.PhotoAlbumId)))
+            return TypedResults.BadRequest("FileName name already exists");
+        
+        oldPhoto.Name = editNameDto.NewName;
+        await Context.SaveChangesAsync();
+        return TypedResults.Ok();
+    }
 }

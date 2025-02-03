@@ -88,6 +88,7 @@ public class PhotoAlbumController : ApiControllerBase
 
     [HttpPost]
     [Authorize]
+    [Route("{albumName}")]
     [RequiredScope("backend.write")]
     public async Task<Results<Created, BadRequest<string>>> CreatePhotoAlbum(string albumName)
     {
@@ -151,5 +152,47 @@ public class PhotoAlbumController : ApiControllerBase
             .ToList();
 
         return TypedResults.Ok(photoAlbums);
+    }
+    
+    [HttpPut]
+    [Authorize]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Ok, BadRequest<string>>> EditPhotoAlbumName(EditNameDto editNameDto)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
+        
+        // check if the user exists
+        if (user == null) 
+            // if user was not able created then the claims had an issue meaning unauthorized
+            throw new UnauthorizedAccessException();
+        
+        var oldAlbum = Context.PhotoAlbums.FirstOrDefault(pa => 
+            pa.Id == editNameDto.OldId);
+        
+        if (oldAlbum == null)
+            return TypedResults.BadRequest("Original album doesn't exist");
+        
+        // check if the album name is valid
+        if (string.IsNullOrWhiteSpace(editNameDto.NewName))
+            return TypedResults.BadRequest("Album name is required");
+        
+        if (editNameDto.NewName.Length > 1024)
+            return TypedResults.BadRequest("An Album name can't be longer than 1024 characters");
+        
+        // check if the album name doesn't contain invalid characters
+        if (editNameDto.NewName.Any(c => ReservedCharacters.Contains(c)))
+            return TypedResults.BadRequest("Album name contains invalid characters");
+        
+        // check if the album name is unique
+        if (Context.PhotoAlbums.AsEnumerable()
+            .Any(pa => pa.Name.Equals(
+                editNameDto.NewName, 
+                StringComparison.Ordinal)))
+            return TypedResults.BadRequest("Album name already exists");
+        
+        oldAlbum.Name = editNameDto.NewName;
+        await Context.SaveChangesAsync();
+        return TypedResults.Ok();
     }
 }

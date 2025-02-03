@@ -25,7 +25,7 @@ public class UploadController : ApiControllerBase
     //     - must end with letter or digit
     //     - ensures string does not end with '-'
     // $: End of the string.
-    private static readonly Regex ContainerNameRegex = new(
+    public static readonly Regex ContainerNameRegex = new(
         "^(?!-)(?!.*--)[a-z0-9]([a-z0-9-]{1,61}[a-z0-9])?$",
         RegexOptions.Compiled
     );
@@ -58,7 +58,7 @@ public class UploadController : ApiControllerBase
             throw new UnauthorizedAccessException();
         
         // check if the photo album exists
-        if (!Context.PhotoAlbums.Any(pa => pa.Id == photoDto.PhotoAlbumId))
+        if (!Context.PhotoAlbums.Any(pa => pa.Id.Equals(photoDto.PhotoAlbumId)))
             return TypedResults.BadRequest("The photo album doesn't exist.");
         
         // check if the photo is empty
@@ -70,15 +70,16 @@ public class UploadController : ApiControllerBase
             return TypedResults.BadRequest("FileName name is required");
         
         if (photoDto.FileName.Length < 3 || photoDto.FileName.Length > 63)
-            return TypedResults.BadRequest("An FileName name can't be longer than 63 characters or shorter than 3");
+            return TypedResults.BadRequest("A FileName name can't be longer than 63 characters or shorter than 3");
         
         // check if the album name doesn't contain invalid characters
         if (!ContainerNameRegex.IsMatch(photoDto.FileName))
             return TypedResults.BadRequest("FileName name contains invalid characters");
         
-        // check if the album name is unique
+        // check if the file is unique in album
         if (Context.Photos.Any(p => 
-                p.Name.Equals(photoDto.FileName, StringComparison.Ordinal)))
+                p.Name.Equals(photoDto.FileName, StringComparison.Ordinal) &&
+                p.PhotoAlbumId.Equals(photoDto.PhotoAlbumId)))
             return TypedResults.BadRequest("FileName name already exists");
         
         // convert the photo to a byte array
@@ -101,7 +102,7 @@ public class UploadController : ApiControllerBase
         
         var album = Context.PhotoAlbums
             .Include(photoAlbum => photoAlbum.User)
-            .FirstOrDefault(pa => pa.Id == photo.PhotoAlbumId);
+            .FirstOrDefault(pa => pa.Id.Equals(photo.PhotoAlbumId));
         
         await PhotoSvc.UploadPhoto(
             album!.User.Id,
