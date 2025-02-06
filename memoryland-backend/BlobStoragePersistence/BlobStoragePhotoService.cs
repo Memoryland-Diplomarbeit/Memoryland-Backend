@@ -25,7 +25,7 @@ public class BlobStoragePhotoService
         var accessKey = config.GetValue<string>(
             "ConnectionStrings:BlobStorageDefault");
         
-        if (string.IsNullOrEmpty(accessKey))
+        if (string.IsNullOrWhiteSpace(accessKey))
             throw new NullReferenceException(nameof(accessKey));
         
         foreach (var value in accessKey.Split(';'))

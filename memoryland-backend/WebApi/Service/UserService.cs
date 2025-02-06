@@ -1,4 +1,3 @@
-using System.Security.Authentication;
 using System.Security.Claims;
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
@@ -28,7 +27,7 @@ public class UserService
         var email = enumerable
             .FirstOrDefault(c => c.Type == "email")?.Value;
         
-        if (string.IsNullOrEmpty(email))
+        if (string.IsNullOrWhiteSpace(email))
             return null;
 
         var user = Context.Users.FirstOrDefault(u => u.Email == email);
@@ -39,7 +38,7 @@ public class UserService
         var username = enumerable
             .FirstOrDefault(c => c.Type == "name")?.Value;
         
-        if (string.IsNullOrEmpty(username))
+        if (string.IsNullOrWhiteSpace(username))
             return null;
         
         user = new User
@@ -65,9 +64,9 @@ public class UserService
                 "emails", 
                 StringComparison.CurrentCultureIgnoreCase))
             ?.Value;
-        
+
         if (email == null)
-            throw new AuthenticationException("User email not found.");
+            return null;
 
         if (createUserIfNotExist)
             return await CreateUserIfNotExist(claimList); // needs all claims to get the name too
