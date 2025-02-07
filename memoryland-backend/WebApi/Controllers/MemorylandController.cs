@@ -27,6 +27,8 @@ public class MemorylandController : ApiControllerBase
         UserSvc = userSvc;
         PhotoSvc = photoSvc;
     }
+
+    #region Get-Endpoints
     
     [HttpGet]
     [Route("/all")]
@@ -146,7 +148,6 @@ public class MemorylandController : ApiControllerBase
         return TypedResults.Ok(await Context.MemorylandTypes.ToListAsync());
     }
     
-    
     [HttpGet]
     [Route("/{id:int}/token/{isPublic:bool?}")]
     [Authorize]
@@ -176,7 +177,7 @@ public class MemorylandController : ApiControllerBase
         if (memoryland.UserId != user.Id)
             return TypedResults.Unauthorized();
         
-        // Generate token
+        // Generate new token and delete old one
         var memorylandToken = Context.MemorylandTokens
             .FirstOrDefault(mt => 
                 mt.MemorylandId.Equals(memoryland.Id) &&
@@ -214,5 +215,108 @@ public class MemorylandController : ApiControllerBase
         
         return TypedResults.Ok(token);
     }
+    
+    #endregion
+    
+    #region Post-Endpoints
+    
+    [HttpPost]
+    [Authorize]
+    [Route("/{memorylandName}/{memorylandTypeId:long}")]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemoryland(string memorylandName, long memorylandTypeId)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
+        
+        // check if the user exists
+        if (user == null) 
+            // if user was not able created then the claims had an issue meaning unauthorized
+            return TypedResults.Unauthorized();
+        
+        // check if the album name is valid
+        if (string.IsNullOrWhiteSpace(memorylandName))
+            return TypedResults.BadRequest("Memoryland name is required");
+        
+        if (memorylandName.Length > 1024)
+            return TypedResults.BadRequest("A Memoryland name can't be longer than 1024 characters");
+        
+        // check if the album name doesn't contain invalid characters
+        if (memorylandName.Any(c => PhotoAlbumController.ReservedCharacters.Contains(c)))
+            return TypedResults.BadRequest("Memoryland name contains invalid characters");
+        
+        // check if the album name is unique
+        if (Context.Memorylands.Any(m => 
+                m.Name.Equals(memorylandName, StringComparison.Ordinal)))
+            return TypedResults.BadRequest("Memoryland name already exists");
+        
+        if (!Context.MemorylandTypes.Any(mt => mt.Id.Equals(memorylandTypeId)))
+            return TypedResults.BadRequest("Memoryland type does not exist");
+        
+        var memoryland = new Memoryland
+        {
+            Name = memorylandName,
+            MemorylandTypeId = memorylandTypeId,
+            UserId = user.Id
+        };
 
+        await Context.Memorylands.AddAsync(memoryland);
+        await Context.SaveChangesAsync();
+        
+        return TypedResults.Created();
+    }
+    
+    [HttpPost]
+    [Authorize]
+    [Route("/{memorylandId:long}")]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemoryland(
+        long memorylandId, 
+        [FromBody] PostMemorylandConfigDto postConfDto)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
+        
+        // check if the user exists
+        if (user == null) 
+            // if user was not able created then the claims had an issue meaning unauthorized
+            return TypedResults.Unauthorized();
+        
+        // check if the memoryland exists
+        var memoryland = Context.Memorylands
+            .Include(m => m.User)
+            .Include(m => m.MemorylandType)
+            .Include(m => m.MemorylandConfigurations)
+            .FirstOrDefault(m => m.Id == memorylandId);
+        
+        if (memoryland is null)
+            return TypedResults.BadRequest("Memoryland does not exist");
+        
+        // check if the position is valid (starts with 0)
+        if (memoryland.MemorylandType.PhotoAmount >= postConfDto.Position || postConfDto.Position < 0)
+            return TypedResults.BadRequest("Position is invalid");
+        
+        // check if the position already has a photo
+        if (memoryland.MemorylandConfigurations.Any(mc => 
+                mc.Position.Equals(postConfDto.Position)))
+            return TypedResults.BadRequest("Position already has a photo");
+        
+        // check if the photo exists
+        if (!Context.Photos.Any(p => p.Id.Equals(postConfDto.PhotoId)))
+            return TypedResults.BadRequest("Photo does not exist");
+        
+        var memorylandConf = new MemorylandConfiguration
+        {
+            Position = postConfDto.Position,
+            MemorylandId = memoryland.Id,
+            PhotoId = postConfDto.PhotoId
+        };
+
+        await Context.MemorylandConfigurations.AddAsync(memorylandConf);
+        await Context.SaveChangesAsync();
+        
+        return TypedResults.Created();
+    }
+    
+    #endregion
 }

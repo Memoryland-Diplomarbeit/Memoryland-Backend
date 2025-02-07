@@ -13,7 +13,7 @@ namespace WebApi.Controllers;
 
 public class PhotoAlbumController : ApiControllerBase
 {
-    private static string ReservedCharacters { get; } = "!*'();:@&=+$,/?#[]";
+    public static string ReservedCharacters { get; } = "!*'();:@&=+$,/?#[]";
     private ApplicationDbContext Context { get; }
     private BlobStoragePhotoService PhotoSvc { get; }
     private UserService UserSvc { get; }
