@@ -90,7 +90,7 @@ public class PhotoAlbumController : ApiControllerBase
     [Authorize]
     [Route("{albumName}")]
     [RequiredScope("backend.write")]
-    public async Task<Results<Created, BadRequest<string>>> CreatePhotoAlbum(string albumName)
+    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreatePhotoAlbum(string albumName)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
@@ -98,7 +98,7 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the user exists
         if (user == null) 
             // if user was not able created then the claims had an issue meaning unauthorized
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
         
         // check if the album name is valid
         if (string.IsNullOrWhiteSpace(albumName))
@@ -157,7 +157,7 @@ public class PhotoAlbumController : ApiControllerBase
     [HttpPut]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Ok, BadRequest<string>>> EditPhotoAlbumName(EditNameDto editNameDto)
+    public async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult>> EditPhotoAlbumName(EditNameDto editNameDto)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
@@ -165,7 +165,7 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the user exists
         if (user == null) 
             // if user was not able created then the claims had an issue meaning unauthorized
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
         
         var oldAlbum = Context.PhotoAlbums.FirstOrDefault(pa => 
             pa.Id == editNameDto.OldId);

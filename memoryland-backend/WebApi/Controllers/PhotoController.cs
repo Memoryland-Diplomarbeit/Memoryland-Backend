@@ -83,7 +83,7 @@ public class PhotoController : ApiControllerBase
     [HttpPut]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Ok, BadRequest<string>>> EditPhotoName(EditNameDto editNameDto)
+    public async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult>> EditPhotoName(EditNameDto editNameDto)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
@@ -91,7 +91,7 @@ public class PhotoController : ApiControllerBase
         // check if the user exists
         if (user == null) 
             // if user was not able created then the claims had an issue meaning unauthorized
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
         
         var oldPhoto = Context.Photos.FirstOrDefault(p => 
             p.Id == editNameDto.OldId);

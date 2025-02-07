@@ -47,7 +47,7 @@ public class UploadController : ApiControllerBase
     [Route("photo")]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Created, BadRequest<string>>> UploadPhoto([FromForm] PostPhotoDto<IFormFile> photoDto)
+    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> UploadPhoto([FromForm] PostPhotoDto<IFormFile> photoDto)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
@@ -55,7 +55,7 @@ public class UploadController : ApiControllerBase
         // check if the user exists
         if (user == null) 
             // if user was not able created then the claims had an issue meaning unauthorized
-            throw new UnauthorizedAccessException();
+            return TypedResults.Unauthorized();
         
         // check if the photo album exists
         if (!Context.PhotoAlbums.Any(pa => pa.Id.Equals(photoDto.PhotoAlbumId)))
