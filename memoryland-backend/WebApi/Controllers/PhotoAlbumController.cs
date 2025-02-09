@@ -47,22 +47,16 @@ public class PhotoAlbumController : ApiControllerBase
         if (!Context.Photos.Any()) 
             return TypedResults.NotFound();
         
-        if (!Context.PhotoAlbums.Any(pa => pa.Id == albumId))
+        if (!Context.PhotoAlbums.Any(pa => pa.Id == albumId && pa.UserId == user.Id))
             return TypedResults.NotFound();
         
         // check if the photo exists and if the user is the owner
         var photoAlbum = await Context.PhotoAlbums
-            .Include(p => p.User)
             .Include(p => p.Photos)
             .FirstOrDefaultAsync(p => p.Id == albumId);
 
         if (photoAlbum == null || photoAlbum.Photos.Count == 0) 
             return TypedResults.NotFound();
-        
-        if (!photoAlbum.User.Email.Equals(
-                user.Email, 
-                StringComparison.CurrentCultureIgnoreCase))
-            return TypedResults.Unauthorized();
 
         var photos = new List<PhotoDto>();
 
@@ -145,7 +139,8 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.PhotoAlbums.Any(pa => 
-                pa.Name.Equals(albumName, StringComparison.Ordinal)))
+                pa.Name.Equals(albumName, StringComparison.Ordinal) &&
+                pa.UserId == user.Id))
             return TypedResults.BadRequest("Album name already exists");
         
         var photoAlbum = new PhotoAlbum
@@ -184,7 +179,8 @@ public class PhotoAlbumController : ApiControllerBase
             return TypedResults.Unauthorized();
         
         var oldAlbum = Context.PhotoAlbums.FirstOrDefault(pa => 
-            pa.Id == editNameDto.OldId);
+            pa.Id == editNameDto.OldId &&
+            pa.UserId == user.Id);
         
         if (oldAlbum == null)
             return TypedResults.BadRequest("Original album doesn't exist");
@@ -202,9 +198,9 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.PhotoAlbums.AsEnumerable()
-            .Any(pa => pa.Name.Equals(
-                editNameDto.NewName, 
-                StringComparison.Ordinal)))
+            .Any(pa => 
+                pa.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
+                pa.UserId == user.Id))
             return TypedResults.BadRequest("Album name already exists");
         
         oldAlbum.Name = editNameDto.NewName;
