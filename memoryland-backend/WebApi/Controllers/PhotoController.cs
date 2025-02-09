@@ -81,7 +81,38 @@ public class PhotoController : ApiControllerBase
     
     #region Delete-Endpoints
     
-    //TODO: delete photo
+    [HttpDelete]
+    [Route("/{id:long}")]
+    [Authorize]
+    [RequiredScope("backend.read")]
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoById(long id)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any photos at all, for performance
+        if (!Context.Photos.Any()) 
+            return TypedResults.Ok();
+        
+        // check if the photo exists and if the user is the owner
+        var photo = Context.Photos
+            .Include(p => p.PhotoAlbum)
+            .FirstOrDefault(p => 
+                p.Id == id && 
+                p.PhotoAlbum.UserId == user.Id);
+        
+        if (photo == null)
+            return TypedResults.Ok();
+        
+        Context.Photos.Remove(photo);
+        await Context.SaveChangesAsync();
+            
+        return TypedResults.Ok();
+    }
     
     #endregion
 
