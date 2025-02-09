@@ -113,5 +113,5 @@ public class UploadController : ApiControllerBase
         return TypedResults.Created();
     }
 
-    //TODO: Resumable upload logic
+    //TODO: resumable upload for albums
 }

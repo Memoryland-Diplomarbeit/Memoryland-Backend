@@ -25,6 +25,8 @@ public class PhotoController : ApiControllerBase
         PhotoSvc = photoService;
         UserSvc = userService;
     }
+
+    #region Get-Endpoints
     
     [HttpGet]
     [Route("{albumId:int}/{photoName}")]
@@ -78,7 +80,16 @@ public class PhotoController : ApiControllerBase
             
         return TypedResults.Ok(photoDto);
     }
+
+    #endregion
     
+    #region Delete-Endpoints
+    
+    //TODO: delete photo
+    
+    #endregion
+
+    #region Put-Endpoints
     
     [HttpPut]
     [Authorize]
@@ -120,4 +131,6 @@ public class PhotoController : ApiControllerBase
         await Context.SaveChangesAsync();
         return TypedResults.Ok();
     }
+    
+    #endregion
 }

@@ -319,4 +319,21 @@ public class MemorylandController : ApiControllerBase
     }
     
     #endregion
+    
+    #region Delete-Endpoints
+    
+    //TODO: delete memoryland
+    
+    //TODO: delete single memoryland configuration
+    
+    #endregion
+    
+    #region Put-Endpoints
+    
+    //TODO: rename memoryland
+    
+    //TODO: update memoryland configuration
+    
+    #endregion
+    
 }

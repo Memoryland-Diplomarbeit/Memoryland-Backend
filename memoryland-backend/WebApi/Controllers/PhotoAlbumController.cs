@@ -27,6 +27,8 @@ public class PhotoAlbumController : ApiControllerBase
         PhotoSvc = photoService;
         UserSvc = userService;
     }
+
+    #region Get-Endpoints
     
     [HttpGet]
     [Route("{albumId:int}")]
@@ -86,6 +88,36 @@ public class PhotoAlbumController : ApiControllerBase
         return TypedResults.Ok(photos.AsEnumerable());
     }
 
+    [HttpGet]
+    [Authorize]
+    [RequiredScope("backend.read")]
+    public async Task<Results<Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
+        GetPhotoAlbumsData()
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Ok(new List<PhotoAlbumDto>());
+            // would throw an exception if the user were not allowed
+
+        var photoAlbums = Context.PhotoAlbums
+            .Where(pa => pa.UserId == user.Id)
+            .Include(pa => pa.Photos)
+            .Select(pa => new PhotoAlbumDto(
+                pa.Id, 
+                pa.Name, 
+                pa.Photos.Select(p => p.Name)))
+            .ToList();
+
+        return TypedResults.Ok(photoAlbums);
+    }
+    
+    #endregion
+
+    #region Post-Endpoints
+
     [HttpPost]
     [Authorize]
     [Route("{albumName}")]
@@ -113,7 +145,7 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.PhotoAlbums.Any(pa => 
-            pa.Name.Equals(albumName, StringComparison.Ordinal)))
+                pa.Name.Equals(albumName, StringComparison.Ordinal)))
             return TypedResults.BadRequest("Album name already exists");
         
         var photoAlbum = new PhotoAlbum
@@ -127,32 +159,16 @@ public class PhotoAlbumController : ApiControllerBase
         
         return TypedResults.Created();
     }
+    
+    #endregion
+    
+    #region Delete-Endpoints
 
-    [HttpGet]
-    [Authorize]
-    [RequiredScope("backend.read")]
-    public async Task<Results<Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
-        GetPhotoAlbumsData()
-    {
-        // check if the user is authenticated without errors
-        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
-        
-        // check if the user exists
-        if (user == null)
-            return TypedResults.Ok(new List<PhotoAlbumDto>());
-            // would throw an exception if the user were not allowed
+    //TODO: delete photo album
 
-        var photoAlbums = Context.PhotoAlbums
-            .Where(pa => pa.UserId == user.Id)
-            .Include(pa => pa.Photos)
-            .Select(pa => new PhotoAlbumDto(
-                pa.Id, 
-                pa.Name, 
-                pa.Photos.Select(p => p.Name)))
-            .ToList();
-
-        return TypedResults.Ok(photoAlbums);
-    }
+    #endregion
+    
+    #region Put-Endpoints
     
     [HttpPut]
     [Authorize]
@@ -195,4 +211,6 @@ public class PhotoAlbumController : ApiControllerBase
         await Context.SaveChangesAsync();
         return TypedResults.Ok();
     }
+    
+    #endregion
 }
