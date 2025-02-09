@@ -45,10 +45,10 @@ namespace Persistence.Migrations
 
                     b.HasIndex("MemorylandTypeId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
 
                     b.ToTable("Memorylands");
                 });
@@ -182,10 +182,10 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
 
                     b.ToTable("PhotoAlbums");
                 });

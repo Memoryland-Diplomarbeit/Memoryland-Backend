@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250109152312_Initial")]
+    [Migration("20250209145040_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -48,10 +48,10 @@ namespace Persistence.Migrations
 
                     b.HasIndex("MemorylandTypeId");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
 
                     b.ToTable("Memorylands");
                 });
@@ -185,10 +185,10 @@ namespace Persistence.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Name")
-                        .IsUnique();
-
                     b.HasIndex("UserId");
+
+                    b.HasIndex("Name", "UserId")
+                        .IsUnique();
 
                     b.ToTable("PhotoAlbums");
                 });

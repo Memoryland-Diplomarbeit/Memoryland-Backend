@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 namespace Core.Entities;
 
 #nullable disable
-[Index(nameof(Name), IsUnique = true)]
+[Index(nameof(Name), nameof(UserId), IsUnique = true)]
 public class PhotoAlbum : BaseEntity
 {
     [Required, MaxLength(50)]

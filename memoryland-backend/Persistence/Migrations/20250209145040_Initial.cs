@@ -177,9 +177,9 @@ namespace Persistence.Migrations
                 column: "MemorylandTypeId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Memorylands_Name",
+                name: "IX_Memorylands_Name_UserId",
                 table: "Memorylands",
-                column: "Name",
+                columns: new[] { "Name", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
@@ -211,9 +211,9 @@ namespace Persistence.Migrations
                 unique: true);
 
             migrationBuilder.CreateIndex(
-                name: "IX_PhotoAlbums_Name",
+                name: "IX_PhotoAlbums_Name_UserId",
                 table: "PhotoAlbums",
-                column: "Name",
+                columns: new[] { "Name", "UserId" },
                 unique: true);
 
             migrationBuilder.CreateIndex(
