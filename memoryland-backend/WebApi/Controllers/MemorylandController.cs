@@ -395,9 +395,47 @@ public class MemorylandController : ApiControllerBase
     
     #region Put-Endpoints
     
-    //TODO: rename memoryland
-    
-    //TODO: update memoryland configuration
+    [HttpPut]
+    [Authorize]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Ok, BadRequest<string>, UnauthorizedHttpResult>> EditMemorylandName(EditNameDto editNameDto)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims, true);
+        
+        // check if the user exists
+        if (user == null) 
+            // if user was not able created then the claims had an issue meaning unauthorized
+            return TypedResults.Unauthorized();
+        
+        var oldMemoryland = Context.Memorylands.FirstOrDefault(p => 
+            p.Id == editNameDto.OldId && 
+            p.UserId == user.Id);
+        
+        if (oldMemoryland == null)
+            return TypedResults.BadRequest("Original memoryland doesn't exist");
+        
+        // check if the memoryland name is valid
+        if (string.IsNullOrWhiteSpace(editNameDto.NewName))
+            return TypedResults.BadRequest("Memoryland name is required");
+        
+        if (editNameDto.NewName.Length > 1024)
+            return TypedResults.BadRequest("A Memoryland name can't be longer than 1024 characters");
+        
+        // check if the album name doesn't contain invalid characters
+        if (editNameDto.NewName.Any(c => PhotoAlbumController.ReservedCharacters.Contains(c)))
+            return TypedResults.BadRequest("Memoryland name contains invalid characters");
+        
+        // check if the album name is unique
+        if (Context.Memorylands.Any(m => 
+                m.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
+                m.UserId.Equals(user.Id)))
+            return TypedResults.BadRequest("Memoryland name already exists");
+        
+        oldMemoryland.Name = editNameDto.NewName;
+        await Context.SaveChangesAsync();
+        return TypedResults.Ok();
+    }
     
     #endregion
     
