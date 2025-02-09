@@ -158,8 +158,36 @@ public class PhotoAlbumController : ApiControllerBase
     #endregion
     
     #region Delete-Endpoints
-
-    //TODO: delete photo album
+    
+    [HttpDelete]
+    [Route("/{id:long}")]
+    [Authorize]
+    [RequiredScope("backend.write")]
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoAlbumById(long id)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any photo-albums at all, for performance
+        if (!Context.PhotoAlbums.Any()) 
+            return TypedResults.Ok();
+        
+        // check if the photo-album exists and if the user is the owner
+        var photoAlbum = Context.PhotoAlbums
+            .FirstOrDefault(pa => pa.Id == id && pa.UserId == user.Id);
+        
+        if (photoAlbum == null)
+            return TypedResults.Ok();
+        
+        Context.PhotoAlbums.Remove(photoAlbum);
+        await Context.SaveChangesAsync();
+            
+        return TypedResults.Ok();
+    }
 
     #endregion
     
