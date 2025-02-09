@@ -77,10 +77,19 @@ public class UploadController : ApiControllerBase
             return TypedResults.BadRequest("FileName name contains invalid characters");
         
         // check if the file is unique in album
-        if (Context.Photos.Any(p => 
+        var dbPhoto = Context.Photos
+            .Include(p => p.PhotoAlbum)
+            .FirstOrDefault(p =>
                 p.Name.Equals(photoDto.FileName, StringComparison.Ordinal) &&
-                p.PhotoAlbumId.Equals(photoDto.PhotoAlbumId)))
-            return TypedResults.BadRequest("FileName name already exists");
+                p.PhotoAlbumId.Equals(photoDto.PhotoAlbumId));
+
+        if (dbPhoto != null)
+        {
+            return TypedResults.BadRequest(
+                !dbPhoto.PhotoAlbum.UserId.Equals(user.Id) ? 
+                    "The photo album doesn't exist." : // unauthorized
+                    "FileName name already exists");
+        }
         
         // convert the photo to a byte array
         byte[] photoData;
