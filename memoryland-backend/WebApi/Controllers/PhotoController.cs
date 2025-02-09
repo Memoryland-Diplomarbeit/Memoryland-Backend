@@ -53,17 +53,13 @@ public class PhotoController : ApiControllerBase
         
         // check if the photo exists and if the user is the owner
         var photo = await Context.Photos
-            .Include(p => p.PhotoAlbum.User)
             .FirstOrDefaultAsync(p => 
-                p.PhotoAlbumId == albumId && p.Name == photoName);
+                p.PhotoAlbumId == albumId && 
+                p.Name == photoName &&
+                p.PhotoAlbum.UserId == user.Id);
 
         if (photo == null) 
             return TypedResults.NotFound();
-        
-        if (!photo.PhotoAlbum.User.Email.Equals(
-                user.Email, 
-                StringComparison.CurrentCultureIgnoreCase))
-            return TypedResults.Unauthorized();
         
         // get the photo uri from the blob storage
         var uri = await PhotoSvc.GetPhoto(
@@ -105,7 +101,8 @@ public class PhotoController : ApiControllerBase
             return TypedResults.Unauthorized();
         
         var oldPhoto = Context.Photos.FirstOrDefault(p => 
-            p.Id == editNameDto.OldId);
+            p.Id == editNameDto.OldId && 
+            p.PhotoAlbum.UserId == user.Id);
         
         if (oldPhoto == null)
             return TypedResults.BadRequest("Original photo doesn't exist");
