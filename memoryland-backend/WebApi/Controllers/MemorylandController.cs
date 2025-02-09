@@ -343,13 +343,10 @@ public class MemorylandController : ApiControllerBase
         
         // check if the memoryland exists and if the user is the owner
         var memoryland = Context.Memorylands
-            .FirstOrDefault(m => m.Id == id);
+            .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
         
         if (memoryland == null)
             return TypedResults.Ok();
-        
-        if (memoryland.UserId != user.Id)
-            return TypedResults.Unauthorized();
         
         Context.Memorylands.Remove(memoryland);
         await Context.SaveChangesAsync();
@@ -377,13 +374,10 @@ public class MemorylandController : ApiControllerBase
         // check if the memoryland exists and if the user is the owner
         var memorylandConfig = Context.MemorylandConfigurations
             .Include(mc => mc.Memoryland)
-            .FirstOrDefault(mc => mc.Id == id);
+            .FirstOrDefault(mc => mc.Id == id && mc.Memoryland.UserId == user.Id);
         
         if (memorylandConfig == null)
             return TypedResults.Ok();
-        
-        if (!memorylandConfig.Memoryland.UserId.Equals(user.Id))
-            return TypedResults.Unauthorized();
         
         Context.MemorylandConfigurations.Remove(memorylandConfig);
         await Context.SaveChangesAsync();
