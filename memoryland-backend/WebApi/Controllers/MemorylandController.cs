@@ -26,6 +26,8 @@ public class MemorylandController : ApiControllerBase
         Context = context;
         UserSvc = userSvc;
         PhotoSvc = photoSvc;
+        
+        //TODO: add memoryland types
     }
 
     #region Get-Endpoints
@@ -70,7 +72,7 @@ public class MemorylandController : ApiControllerBase
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
 
-        var authorizationHeader = Request.Headers["Authorization"].FirstOrDefault();
+        var authorizationHeader = Request.Headers.Authorization.FirstOrDefault();
 
         // check if the user has an authorization header
         if (authorizationHeader == null || !authorizationHeader.StartsWith("Bearer "))
@@ -169,13 +171,10 @@ public class MemorylandController : ApiControllerBase
         var memoryland = Context.Memorylands
             .Include(m => m.User)
             .Include(m => m.MemorylandType)
-            .FirstOrDefault(m => m.Id == id);
+            .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
 
         if (memoryland == null)
             return TypedResults.NotFound();
-
-        if (memoryland.UserId != user.Id)
-            return TypedResults.Unauthorized();
         
         // Generate new token and delete old one
         var memorylandToken = Context.MemorylandTokens
@@ -247,7 +246,8 @@ public class MemorylandController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.Memorylands.Any(m => 
-                m.Name.Equals(memorylandName, StringComparison.Ordinal)))
+                m.Name.Equals(memorylandName, StringComparison.Ordinal) &&
+                m.UserId.Equals(user.Id)))
             return TypedResults.BadRequest("Memoryland name already exists");
         
         if (!Context.MemorylandTypes.Any(mt => mt.Id.Equals(memorylandTypeId)))
@@ -287,7 +287,7 @@ public class MemorylandController : ApiControllerBase
             .Include(m => m.User)
             .Include(m => m.MemorylandType)
             .Include(m => m.MemorylandConfigurations)
-            .FirstOrDefault(m => m.Id == memorylandId);
+            .FirstOrDefault(m => m.Id == memorylandId && m.UserId == user.Id);
         
         if (memoryland is null)
             return TypedResults.BadRequest("Memoryland does not exist");
@@ -302,7 +302,9 @@ public class MemorylandController : ApiControllerBase
             return TypedResults.BadRequest("Position already has a photo");
         
         // check if the photo exists
-        if (!Context.Photos.Any(p => p.Id.Equals(postConfDto.PhotoId)))
+        if (!Context.Photos.Any(p => 
+                p.Id.Equals(postConfDto.PhotoId) && 
+                p.PhotoAlbum.UserId.Equals(user.Id)))
             return TypedResults.BadRequest("Photo does not exist");
         
         var memorylandConf = new MemorylandConfiguration
