@@ -160,10 +160,10 @@ public class PhotoAlbumController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{id:long}")]
+    [Route("/{photoAlbumId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoAlbumById(long id)
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoAlbumById(long photoAlbumId)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -178,7 +178,7 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the photo-album exists and if the user is the owner
         var photoAlbum = Context.PhotoAlbums
-            .FirstOrDefault(pa => pa.Id == id && pa.UserId == user.Id);
+            .FirstOrDefault(pa => pa.Id == photoAlbumId && pa.UserId == user.Id);
         
         if (photoAlbum == null)
             return TypedResults.Ok();

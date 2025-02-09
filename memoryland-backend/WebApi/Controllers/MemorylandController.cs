@@ -325,10 +325,10 @@ public class MemorylandController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{id:long}")]
+    [Route("/{memorylandId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandById(long id)
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandById(long memorylandId)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -343,7 +343,7 @@ public class MemorylandController : ApiControllerBase
         
         // check if the memoryland exists and if the user is the owner
         var memoryland = Context.Memorylands
-            .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
+            .FirstOrDefault(m => m.Id == memorylandId && m.UserId == user.Id);
         
         if (memoryland == null)
             return TypedResults.Ok();
@@ -355,7 +355,7 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpDelete]
-    [Route("/{id:long}")]
+    [Route("/config/{id:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandConfigById(long id)

@@ -82,10 +82,10 @@ public class PhotoController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{id:long}")]
+    [Route("/{photoId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
-    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoById(long id)
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoById(long photoId)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -102,7 +102,7 @@ public class PhotoController : ApiControllerBase
         var photo = Context.Photos
             .Include(p => p.PhotoAlbum)
             .FirstOrDefault(p => 
-                p.Id == id && 
+                p.Id == photoId && 
                 p.PhotoAlbum.UserId == user.Id);
         
         if (photo == null)
