@@ -84,7 +84,7 @@ public class PhotoController : ApiControllerBase
     [HttpDelete]
     [Route("/{id:long}")]
     [Authorize]
-    [RequiredScope("backend.read")]
+    [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoById(long id)
     {
         // check if the user is authenticated without errors

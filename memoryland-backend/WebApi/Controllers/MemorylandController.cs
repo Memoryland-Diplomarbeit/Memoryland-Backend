@@ -153,7 +153,7 @@ public class MemorylandController : ApiControllerBase
     [HttpGet]
     [Route("/{id:int}/token/{isPublic:bool?}")]
     [Authorize]
-    [RequiredScope("backend.read")]
+    [RequiredScope("backend.write", "backend.read")]
     public async Task<Results<NotFound, Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(int id, bool isPublic = false)
     {
         // check if the user is authenticated without errors
@@ -327,7 +327,7 @@ public class MemorylandController : ApiControllerBase
     [HttpDelete]
     [Route("/{id:long}")]
     [Authorize]
-    [RequiredScope("backend.read")]
+    [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandById(long id)
     {
         // check if the user is authenticated without errors
@@ -357,7 +357,7 @@ public class MemorylandController : ApiControllerBase
     [HttpDelete]
     [Route("/{id:long}")]
     [Authorize]
-    [RequiredScope("backend.read")]
+    [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandConfigById(long id)
     {
         // check if the user is authenticated without errors
