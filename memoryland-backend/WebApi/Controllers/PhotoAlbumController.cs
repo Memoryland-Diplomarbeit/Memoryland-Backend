@@ -34,7 +34,7 @@ public class PhotoAlbumController : ApiControllerBase
     [Route("{albumId:int}")]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<IEnumerable<PhotoDto>>, BadRequest<string>, UnauthorizedHttpResult>> GetPhotoAlbumImagesWithDetails(long albumId)
+    public async Task<Results<NotFound, Ok<IEnumerable<PhotoDto>>, UnauthorizedHttpResult>> GetPhotoAlbumImagesWithDetails(long albumId)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -91,7 +91,7 @@ public class PhotoAlbumController : ApiControllerBase
     [HttpGet]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<Ok<List<PhotoAlbumDto>>, BadRequest<string>, UnauthorizedHttpResult>>
+    public async Task<Ok<List<PhotoAlbumDto>>>
         GetPhotoAlbumsData()
     {
         // check if the user is authenticated without errors

@@ -34,7 +34,7 @@ public class MemorylandController : ApiControllerBase
     [Route("/all")]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<List<MemorylandInfoDto>>, BadRequest<string>, UnauthorizedHttpResult>> GetAllMemorylands()
+    public async Task<Results<Ok<List<MemorylandInfoDto>>, UnauthorizedHttpResult>> GetAllMemorylands()
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -127,7 +127,7 @@ public class MemorylandController : ApiControllerBase
     [HttpGet]
     [Route("/{id:int}/configuration")]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDto>>, BadRequest<string>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
+    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
     {
         var result = await GetCompleteMemoryland(id);
 
@@ -322,9 +322,72 @@ public class MemorylandController : ApiControllerBase
     
     #region Delete-Endpoints
     
-    //TODO: delete memoryland
+    [HttpDelete]
+    [Route("/{id:long}")]
+    [Authorize]
+    [RequiredScope("backend.read")]
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandById(long id)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any memorylands at all, for performance
+        if (!Context.Memorylands.Any()) 
+            return TypedResults.Ok();
+        
+        // check if the memoryland exists and if the user is the owner
+        var memoryland = Context.Memorylands
+            .FirstOrDefault(m => m.Id == id);
+        
+        if (memoryland == null)
+            return TypedResults.Ok();
+        
+        if (memoryland.UserId != user.Id)
+            return TypedResults.Unauthorized();
+        
+        Context.Memorylands.Remove(memoryland);
+        await Context.SaveChangesAsync();
+            
+        return TypedResults.Ok();
+    }
     
-    //TODO: delete single memoryland configuration
+    [HttpDelete]
+    [Route("/{id:long}")]
+    [Authorize]
+    [RequiredScope("backend.read")]
+    public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandConfigById(long id)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any memorylands at all, for performance
+        if (!Context.Memorylands.Any()) 
+            return TypedResults.Ok();
+        
+        // check if the memoryland exists and if the user is the owner
+        var memorylandConfig = Context.MemorylandConfigurations
+            .Include(mc => mc.Memoryland)
+            .FirstOrDefault(mc => mc.Id == id);
+        
+        if (memorylandConfig == null)
+            return TypedResults.Ok();
+        
+        if (!memorylandConfig.Memoryland.UserId.Equals(user.Id))
+            return TypedResults.Unauthorized();
+        
+        Context.MemorylandConfigurations.Remove(memorylandConfig);
+        await Context.SaveChangesAsync();
+            
+        return TypedResults.Ok();
+    }
     
     #endregion
     
