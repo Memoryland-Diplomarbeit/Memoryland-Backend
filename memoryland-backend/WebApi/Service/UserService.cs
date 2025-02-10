@@ -72,7 +72,7 @@ public class UserService
             return await CreateUserIfNotExist(claimList); // needs all claims to get the name too
         
         var user = await Context.Users
-            .FirstOrDefaultAsync(u => u.Username == email);
+            .FirstOrDefaultAsync(u => u.Email == email);
 
         return user;
     }
