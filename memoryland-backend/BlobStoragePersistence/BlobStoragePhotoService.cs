@@ -63,6 +63,25 @@ public class BlobStoragePhotoService
         using var stream = new MemoryStream(photo);
         await blobClient.UploadAsync(stream, overwrite: true);
     }
+    
+    public async Task DeletePhotos(long userId, List<long> photoIds)
+    {
+        var containerClient = BlobSvcClient
+            .GetBlobContainerClient(PadLong(userId));
+        
+        if (!await containerClient.ExistsAsync()) return;
+
+        var deleteTasks = photoIds.Select(async photoId =>
+        {
+            var blobClient = containerClient.GetBlobClient(PadLong(photoId));
+            
+            if (await blobClient.ExistsAsync())
+                await blobClient.DeleteAsync();
+        });
+
+        await Task.WhenAll(deleteTasks);
+    }
+
 
     public async Task<Uri?> GetPhoto(
         long userId, 

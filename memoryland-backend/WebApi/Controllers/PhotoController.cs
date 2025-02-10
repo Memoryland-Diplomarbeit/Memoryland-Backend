@@ -107,6 +107,10 @@ public class PhotoController : ApiControllerBase
         
         if (photo == null)
             return TypedResults.Ok();
+
+        await PhotoSvc.DeletePhotos(
+            user.Id, 
+            [photo.Id]);
         
         Context.Photos.Remove(photo);
         await Context.SaveChangesAsync();

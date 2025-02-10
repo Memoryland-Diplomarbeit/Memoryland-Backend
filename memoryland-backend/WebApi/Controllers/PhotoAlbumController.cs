@@ -178,10 +178,17 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the photo-album exists and if the user is the owner
         var photoAlbum = Context.PhotoAlbums
+            .Include(pa => pa.Photos)
             .FirstOrDefault(pa => pa.Id == photoAlbumId && pa.UserId == user.Id);
         
         if (photoAlbum == null)
             return TypedResults.Ok();
+        
+        await PhotoSvc.DeletePhotos(
+            user.Id, 
+            photoAlbum.Photos
+                .Select(p => p.Id)
+                .ToList());
         
         Context.PhotoAlbums.Remove(photoAlbum);
         await Context.SaveChangesAsync();
