@@ -139,7 +139,7 @@ public class PhotoAlbumController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.PhotoAlbums.Any(pa => 
-                pa.Name.Equals(albumName, StringComparison.Ordinal) &&
+                pa.Name == albumName &&
                 pa.UserId == user.Id))
             return TypedResults.BadRequest("Album name already exists");
         

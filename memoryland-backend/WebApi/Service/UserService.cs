@@ -25,7 +25,7 @@ public class UserService
     {
         var enumerable = claims.ToList();
         var email = enumerable
-            .FirstOrDefault(c => c.Type == "email")?.Value;
+            .FirstOrDefault(c => c.Type == "emails")?.Value;
         
         if (string.IsNullOrWhiteSpace(email))
             return null;
