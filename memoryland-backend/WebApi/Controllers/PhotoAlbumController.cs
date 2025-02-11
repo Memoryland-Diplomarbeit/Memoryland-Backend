@@ -102,7 +102,7 @@ public class PhotoAlbumController : ApiControllerBase
             .Select(pa => new PhotoAlbumDto(
                 pa.Id, 
                 pa.Name, 
-                pa.Photos.Select(p => p.Name)))
+                pa.Photos.Select(p => new PhotoDataDto(p.Id, p.Name))))
             .ToList();
 
         return TypedResults.Ok(photoAlbums);
