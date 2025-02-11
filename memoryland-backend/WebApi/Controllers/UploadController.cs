@@ -73,15 +73,15 @@ public class UploadController : ApiControllerBase
             return TypedResults.BadRequest("A FileName name can't be longer than 63 characters or shorter than 3");
         
         // check if the album name doesn't contain invalid characters
-        if (!ContainerNameRegex.IsMatch(photoDto.FileName))
+        if (ContainerNameRegex.IsMatch(photoDto.FileName))
             return TypedResults.BadRequest("FileName name contains invalid characters");
         
         // check if the file is unique in album
         var dbPhoto = Context.Photos
             .Include(p => p.PhotoAlbum)
             .FirstOrDefault(p =>
-                p.Name.Equals(photoDto.FileName, StringComparison.Ordinal) &&
-                p.PhotoAlbumId.Equals(photoDto.PhotoAlbumId));
+                p.Name == photoDto.FileName &&
+                p.PhotoAlbumId == photoDto.PhotoAlbumId);
 
         if (dbPhoto != null)
         {
@@ -111,7 +111,7 @@ public class UploadController : ApiControllerBase
         
         var album = Context.PhotoAlbums
             .Include(photoAlbum => photoAlbum.User)
-            .FirstOrDefault(pa => pa.Id.Equals(photo.PhotoAlbumId));
+            .FirstOrDefault(pa => pa.Id == photo.PhotoAlbumId);
         
         await PhotoSvc.UploadPhoto(
             album!.User.Id,
