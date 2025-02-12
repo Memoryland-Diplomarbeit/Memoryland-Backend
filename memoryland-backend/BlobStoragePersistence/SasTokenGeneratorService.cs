@@ -7,13 +7,13 @@ namespace BlobStoragePersistence;
 
 public static class SasTokenGeneratorService
 {
-    private static double TokenLifeTimeInHours => 2;
+    private static double TokenLifeTimeInHours => 4;
 
     public static Uri CreateUserDelegationSasBlob(
         BlobClient blobClient,
         string accessKey)
     {
-        var tokenStartTime = DateTimeOffset.Now;
+        var tokenStartTime = DateTimeOffset.UtcNow;
         var tokenEndTime = tokenStartTime
             .AddHours(TokenLifeTimeInHours);
         

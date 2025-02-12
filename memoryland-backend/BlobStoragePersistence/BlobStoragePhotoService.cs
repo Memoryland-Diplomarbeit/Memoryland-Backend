@@ -1,5 +1,6 @@
 using Azure.Storage.Blobs;
 using Azure.Storage.Blobs.Models;
+using Core.Entities;
 using Microsoft.Extensions.Configuration;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.Formats;
@@ -49,31 +50,42 @@ public class BlobStoragePhotoService
         byte[] photoBytes)
     {
         var photo = photoBytes;
-
+        var type = "image/jpeg";
+        
         if (photoName.Contains(".jpg") || photoName.Contains(".jpeg"))
             photo = RotateImage(photoBytes); // rotate images if needed
+        else
+            type = "image/png";
         
         var containerClient = BlobSvcClient
             .GetBlobContainerClient(PadLong(userId));
         await containerClient.CreateIfNotExistsAsync();
 
         var blobClient = containerClient
-            .GetBlobClient(PadLong(photoId));
+            .GetBlobClient(PadLong(photoId) + GetExtension(photoName));
 
         using var stream = new MemoryStream(photo);
         await blobClient.UploadAsync(stream, overwrite: true);
+
+        
+        await blobClient.SetHttpHeadersAsync(new BlobHttpHeaders
+        {
+            ContentDisposition = "inline",
+            ContentType = type
+        });
     }
     
-    public async Task DeletePhotos(long userId, List<long> photoIds)
+    public async Task DeletePhotos(long userId, List<Photo> photos)
     {
         var containerClient = BlobSvcClient
             .GetBlobContainerClient(PadLong(userId));
         
         if (!await containerClient.ExistsAsync()) return;
 
-        var deleteTasks = photoIds.Select(async photoId =>
+        var deleteTasks = photos.Select(async photo =>
         {
-            var blobClient = containerClient.GetBlobClient(PadLong(photoId));
+            var blobClient = containerClient.GetBlobClient(
+                PadLong(photo.Id) + GetExtension(photo.Name));
             
             if (await blobClient.ExistsAsync())
                 await blobClient.DeleteAsync();
@@ -85,14 +97,15 @@ public class BlobStoragePhotoService
 
     public async Task<Uri?> GetPhoto(
         long userId, 
-        long photoId)
+        long photoId,
+        string photoName)
     {
         var containerClient = BlobSvcClient
             .GetBlobContainerClient(PadLong(userId));
 
         if (!await containerClient.ExistsAsync()) return null;
         
-        var blobClient = containerClient.GetBlobClient(PadLong(photoId));
+        var blobClient = containerClient.GetBlobClient(PadLong(photoId) + GetExtension(photoName));
 
         if (!await blobClient.ExistsAsync()) return null;
         
@@ -160,5 +173,12 @@ public class BlobStoragePhotoService
         image.Metadata.ExifProfile.SetValue(
             ExifTag.Orientation, 
             (ushort)1); // Normal
+    }
+    
+    private static string GetExtension(string photoName)
+    {
+        return photoName.Contains(".jpg") || photoName.Contains(".jpeg")
+            ? ".jpg"
+            : ".png";
     }
 }

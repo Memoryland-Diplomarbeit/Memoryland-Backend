@@ -65,7 +65,8 @@ public class PhotoAlbumController : ApiControllerBase
             // get the photo uri from the blob storage
             var uri = await PhotoSvc.GetPhoto(
                 user.Id,
-                photo.Id);
+                photo.Id,
+                photo.Name);
         
             if (uri == null) 
                 return TypedResults.NotFound();
@@ -73,7 +74,7 @@ public class PhotoAlbumController : ApiControllerBase
             photos.Add(new PhotoDto(
                 photo.Name,
                 photo.PhotoAlbumId,
-                uri));
+                uri.AbsoluteUri));
         }
         
         photos.Sort((a, b) => 
@@ -186,9 +187,7 @@ public class PhotoAlbumController : ApiControllerBase
         
         await PhotoSvc.DeletePhotos(
             user.Id, 
-            photoAlbum.Photos
-                .Select(p => p.Id)
-                .ToList());
+            photoAlbum.Photos.ToList());
         
         Context.PhotoAlbums.Remove(photoAlbum);
         await Context.SaveChangesAsync();

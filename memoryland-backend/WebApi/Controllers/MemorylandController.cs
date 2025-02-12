@@ -115,11 +115,19 @@ public class MemorylandController : ApiControllerBase
         
         var tasks = memoryland.MemorylandConfigurations.Select(async mc =>
         {
-            var photo = await PhotoSvc.GetPhoto(memoryland.UserId, mc.PhotoId);
+            var dbPhoto = Context.Photos.FirstOrDefault(p => p.Id == mc.PhotoId);
+
+            if (dbPhoto != null)
+            {
+                var photo = await PhotoSvc.GetPhoto(
+                    memoryland.UserId, 
+                    mc.PhotoId,
+                    dbPhoto.Name);
             
-            if (photo != null)
-                memorylandDto.MemorylandConfigurations
-                    .Add(new MemorylandConfigurationDto(mc.Position, photo));
+                if (photo != null)
+                    memorylandDto.MemorylandConfigurations
+                        .Add(new MemorylandConfigurationDto(mc.Position, photo));
+            }
         }).ToList();
         
         await Task.WhenAll(tasks);
