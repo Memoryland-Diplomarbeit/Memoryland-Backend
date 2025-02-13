@@ -69,9 +69,6 @@ public class MemorylandController : ApiControllerBase
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland(int id, [FromQuery] string token)
     {
-        // check if the user is authenticated without errors
-        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
-
         if (string.IsNullOrWhiteSpace(token) || !Guid.TryParse(token, out var guidToken))
             return TypedResults.Unauthorized();
         
@@ -93,10 +90,6 @@ public class MemorylandController : ApiControllerBase
             .FirstOrDefault(mt => mt.Token.Equals(guidToken));
         
         if (memorylandToken == null)
-            return TypedResults.Unauthorized();
-        
-        // check if the user exists
-        if (memorylandToken.IsInternal && user == null)
             return TypedResults.Unauthorized();
 
         var memorylandDto = new MemorylandDto(
