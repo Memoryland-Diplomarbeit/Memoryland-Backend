@@ -20,6 +20,8 @@ public class BlobStoragePhotoService
         
         // get the access key from the user secrets
         var config = new ConfigurationBuilder()
+            .SetBasePath(AppContext.BaseDirectory)
+            .AddJsonFile("appsettings.json", optional: false)
             .AddUserSecrets<BlobStoragePhotoService>()
             .Build();
         
