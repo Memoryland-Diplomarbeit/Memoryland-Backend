@@ -136,19 +136,36 @@ public class MemorylandController : ApiControllerBase
     
     [HttpGet]
     [Route("{id:int}/configuration")]
+    [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
+    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDataDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
     {
-        var result = await GetCompleteMemoryland(id);
-
-        return result.Result switch
-        {
-            Ok<MemorylandDto> { Value: null } => TypedResults.NotFound(),
-            Ok<MemorylandDto> ok => TypedResults.Ok(ok.Value.MemorylandConfigurations),
-            Microsoft.AspNetCore.Http.HttpResults.NotFound => TypedResults.NotFound(),
-            UnauthorizedHttpResult => TypedResults.Unauthorized(),
-            _ => throw new UnreachableException("Should not have gotten here")
-        };
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any memorylands at all, for performance
+        if (!Context.Memorylands.Any()) 
+            return TypedResults.NotFound();
+        
+        // check if the memoryland exists and if the user is the owner
+        var memoryland = Context.Memorylands
+            .Include(m => m.MemorylandConfigurations)
+            .ThenInclude(memorylandConfiguration => memorylandConfiguration.Photo)
+            .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
+        
+        if (memoryland == null)
+            return TypedResults.NotFound();
+        
+        var memorylandConfigDtos = memoryland.MemorylandConfigurations
+            .Select(mc => new MemorylandConfigurationDataDto(
+                mc.Position,
+                new PhotoDataDto(mc.Photo.Id, mc.Photo.Name)));
+        
+        return TypedResults.Ok(memorylandConfigDtos.ToList());
     }
     
     [HttpGet]
