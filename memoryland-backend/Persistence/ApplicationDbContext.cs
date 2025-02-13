@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using System.ComponentModel.DataAnnotations.Schema;
+using System.Diagnostics;
 using Core.Entities;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Diagnostics;
@@ -50,6 +51,28 @@ public class ApplicationDbContext : DbContext
                     LogLevel.Debug,
                     DbContextLoggerOptions.SingleLine | DbContextLoggerOptions.UtcTime)
                 .UseNpgsql(configuration["ConnectionStrings:Default"]); 
+        }
+    }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        foreach (var entity in modelBuilder.Model.GetEntityTypes()
+                     .Where(t =>
+                         t.ClrType.GetProperties()
+                             .Any(p => p.CustomAttributes
+                                 .Any(a => a.AttributeType == typeof(DatabaseGeneratedAttribute)))))
+        {
+            foreach (var property in entity.ClrType.GetProperties()
+                         .Where(p =>
+                             p.PropertyType == typeof(Guid) &&
+                             p.CustomAttributes
+                                 .Any(a => a.AttributeType == typeof(DatabaseGeneratedAttribute))))
+            {
+                modelBuilder
+                    .Entity(entity.ClrType)
+                    .Property(property.Name)
+                    .HasDefaultValueSql("gen_random_uuid()");
+            }
         }
     }
 }

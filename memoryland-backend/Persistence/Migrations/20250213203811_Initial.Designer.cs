@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250209145040_Initial")]
+    [Migration("20250213203811_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -101,7 +101,8 @@ namespace Persistence.Migrations
 
                     b.Property<Guid>("Token")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.HasKey("Id");
 

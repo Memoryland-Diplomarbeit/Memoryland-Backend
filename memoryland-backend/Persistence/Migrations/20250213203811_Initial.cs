@@ -93,7 +93,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Token = table.Column<Guid>(type: "uuid", nullable: false),
+                    Token = table.Column<Guid>(type: "uuid", nullable: false, defaultValueSql: "gen_random_uuid()"),
                     IsInternal = table.Column<bool>(type: "boolean", nullable: false),
                     MemorylandId = table.Column<long>(type: "bigint", nullable: false)
                 },

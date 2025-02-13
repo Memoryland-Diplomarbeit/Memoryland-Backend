@@ -67,19 +67,11 @@ public class MemorylandController : ApiControllerBase
     [HttpGet]
     [Route("{id:int}")]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland(int id)
+    public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland(int id, [FromQuery] string token)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
 
-        var authorizationHeader = Request.Headers.Authorization.FirstOrDefault();
-
-        // check if the user has an authorization header
-        if (authorizationHeader == null || !authorizationHeader.StartsWith("Bearer "))
-            return TypedResults.Unauthorized();
-
-        var token = authorizationHeader.Replace("Bearer ", "");
-        
         if (string.IsNullOrWhiteSpace(token) || !Guid.TryParse(token, out var guidToken))
             return TypedResults.Unauthorized();
         

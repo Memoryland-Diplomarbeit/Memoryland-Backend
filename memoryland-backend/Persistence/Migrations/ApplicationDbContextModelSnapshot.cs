@@ -98,7 +98,8 @@ namespace Persistence.Migrations
 
                     b.Property<Guid>("Token")
                         .ValueGeneratedOnAdd()
-                        .HasColumnType("uuid");
+                        .HasColumnType("uuid")
+                        .HasDefaultValueSql("gen_random_uuid()");
 
                     b.HasKey("Id");
 
