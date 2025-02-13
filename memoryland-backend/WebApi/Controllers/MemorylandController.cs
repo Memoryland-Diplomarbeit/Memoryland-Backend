@@ -33,7 +33,7 @@ public class MemorylandController : ApiControllerBase
     #region Get-Endpoints
     
     [HttpGet]
-    [Route("/all")]
+    [Route("all")]
     [Authorize]
     [RequiredScope("backend.read")]
     public async Task<Results<Ok<List<MemorylandInfoDto>>, UnauthorizedHttpResult>> GetAllMemorylands()
@@ -65,7 +65,7 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("/{id:int}")]
+    [Route("{id:int}")]
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland(int id)
     {
@@ -135,7 +135,7 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("/{id:int}/configuration")]
+    [Route("{id:int}/configuration")]
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
     {
@@ -152,14 +152,14 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("/types")]
+    [Route("types")]
     public async Task<Ok<List<MemorylandType>>> GetMemorylandTypes()
     {
         return TypedResults.Ok(await Context.MemorylandTypes.ToListAsync());
     }
     
     [HttpGet]
-    [Route("/{id:int}/token/{isPublic:bool?}")]
+    [Route("{id:int}/token/{isPublic:bool?}")]
     [Authorize]
     [RequiredScope("backend.write", "backend.read")]
     public async Task<Results<NotFound, Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(int id, bool isPublic = false)
@@ -229,7 +229,7 @@ public class MemorylandController : ApiControllerBase
     
     [HttpPost]
     [Authorize]
-    [Route("/{memorylandName}/{memorylandTypeId:long}")]
+    [Route("{memorylandName}/{memorylandTypeId:long}")]
     [RequiredScope("backend.write")]
     public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemoryland(string memorylandName, long memorylandTypeId)
     {
@@ -276,7 +276,7 @@ public class MemorylandController : ApiControllerBase
     
     [HttpPost]
     [Authorize]
-    [Route("/{memorylandId:long}")]
+    [Route("{memorylandId:long}")]
     [RequiredScope("backend.write")]
     public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemoryland(
         long memorylandId, 
@@ -333,7 +333,7 @@ public class MemorylandController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{memorylandId:long}")]
+    [Route("{memorylandId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandById(long memorylandId)
@@ -363,7 +363,7 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpDelete]
-    [Route("/config/{id:long}")]
+    [Route("config/{id:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeleteMemorylandConfigById(long id)

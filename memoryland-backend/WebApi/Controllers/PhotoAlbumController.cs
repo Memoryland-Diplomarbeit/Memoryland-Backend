@@ -161,7 +161,7 @@ public class PhotoAlbumController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{photoAlbumId:long}")]
+    [Route("{photoAlbumId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoAlbumById(long photoAlbumId)

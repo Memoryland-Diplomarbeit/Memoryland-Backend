@@ -83,7 +83,7 @@ public class PhotoController : ApiControllerBase
     #region Delete-Endpoints
     
     [HttpDelete]
-    [Route("/{photoId:long}")]
+    [Route("{photoId:long}")]
     [Authorize]
     [RequiredScope("backend.write")]
     public async Task<Results<Ok, UnauthorizedHttpResult>> DeletePhotoById(long photoId)
