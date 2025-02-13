@@ -321,16 +321,21 @@ public class MemorylandController : ApiControllerBase
         if (memoryland.MemorylandType.PhotoAmount >= postConfDto.Position || postConfDto.Position < 0)
             return TypedResults.BadRequest("Position is invalid");
         
-        // check if the position already has a photo
-        if (memoryland.MemorylandConfigurations.Any(mc => 
-                mc.Position.Equals(postConfDto.Position)))
-            return TypedResults.BadRequest("Position already has a photo");
-        
         // check if the photo exists
         if (!Context.Photos.Any(p => 
                 p.Id == postConfDto.PhotoId && 
                 p.PhotoAlbum.UserId == user.Id))
             return TypedResults.BadRequest("Photo does not exist");
+        
+        // check if the position already has a photo
+        var photoConfig = memoryland.MemorylandConfigurations.FirstOrDefault(mc =>
+            mc.Position == postConfDto.Position);
+        
+        if (photoConfig != null)
+        {
+            Context.MemorylandConfigurations.Remove(photoConfig);
+            await Context.SaveChangesAsync();
+        }
         
         var memorylandConf = new MemorylandConfiguration
         {
