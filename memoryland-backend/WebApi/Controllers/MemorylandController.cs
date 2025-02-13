@@ -318,7 +318,7 @@ public class MemorylandController : ApiControllerBase
             return TypedResults.BadRequest("Memoryland does not exist");
         
         // check if the position is valid (starts with 0)
-        if (memoryland.MemorylandType.PhotoAmount >= postConfDto.Position || postConfDto.Position < 0)
+        if (memoryland.MemorylandType.PhotoAmount <= postConfDto.Position || postConfDto.Position < 0)
             return TypedResults.BadRequest("Position is invalid");
         
         // check if the photo exists
