@@ -233,7 +233,7 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the album name is unique
         if (Context.PhotoAlbums.AsEnumerable()
             .Any(pa => 
-                pa.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
+                pa.Name == editNameDto.NewName &&
                 pa.UserId == user.Id))
             return TypedResults.BadRequest("Album name already exists");
         

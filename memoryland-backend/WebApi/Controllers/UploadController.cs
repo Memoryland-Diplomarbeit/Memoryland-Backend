@@ -58,7 +58,7 @@ public class UploadController : ApiControllerBase
             return TypedResults.Unauthorized();
         
         // check if the photo album exists
-        if (!Context.PhotoAlbums.Any(pa => pa.Id.Equals(photoDto.PhotoAlbumId)))
+        if (!Context.PhotoAlbums.Any(pa => pa.Id == photoDto.PhotoAlbumId))
             return TypedResults.BadRequest("The photo album doesn't exist.");
         
         // check if the photo is empty

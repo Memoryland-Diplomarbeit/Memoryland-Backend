@@ -156,8 +156,8 @@ public class PhotoController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.Photos.Any(p => 
-                p.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
-                p.PhotoAlbumId.Equals(oldPhoto.PhotoAlbumId)))
+                p.Name == editNameDto.NewName &&
+                p.PhotoAlbumId == oldPhoto.PhotoAlbumId))
             return TypedResults.BadRequest("FileName name already exists");
         
         oldPhoto.Name = editNameDto.NewName;

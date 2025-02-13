@@ -187,8 +187,8 @@ public class MemorylandController : ApiControllerBase
         // Generate new token and delete old one
         var memorylandToken = Context.MemorylandTokens
             .FirstOrDefault(mt => 
-                mt.MemorylandId.Equals(memoryland.Id) &&
-                mt.IsInternal.Equals(!isPublic));
+                mt.MemorylandId == memoryland.Id &&
+                mt.IsInternal != isPublic);
 
         if (memorylandToken != null)
         {
@@ -254,11 +254,11 @@ public class MemorylandController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.Memorylands.Any(m => 
-                m.Name.Equals(memorylandName, StringComparison.Ordinal) &&
-                m.UserId.Equals(user.Id)))
+                m.Name == memorylandName &&
+                m.UserId == user.Id))
             return TypedResults.BadRequest("Memoryland name already exists");
         
-        if (!Context.MemorylandTypes.Any(mt => mt.Id.Equals(memorylandTypeId)))
+        if (!Context.MemorylandTypes.Any(mt => mt.Id == memorylandTypeId))
             return TypedResults.BadRequest("Memoryland type does not exist");
         
         var memoryland = new Memoryland
@@ -311,8 +311,8 @@ public class MemorylandController : ApiControllerBase
         
         // check if the photo exists
         if (!Context.Photos.Any(p => 
-                p.Id.Equals(postConfDto.PhotoId) && 
-                p.PhotoAlbum.UserId.Equals(user.Id)))
+                p.Id == postConfDto.PhotoId && 
+                p.PhotoAlbum.UserId == user.Id))
             return TypedResults.BadRequest("Photo does not exist");
         
         var memorylandConf = new MemorylandConfiguration
@@ -430,8 +430,8 @@ public class MemorylandController : ApiControllerBase
         
         // check if the album name is unique
         if (Context.Memorylands.Any(m => 
-                m.Name.Equals(editNameDto.NewName, StringComparison.Ordinal) &&
-                m.UserId.Equals(user.Id)))
+                m.Name == editNameDto.NewName &&
+                m.UserId == user.Id))
             return TypedResults.BadRequest("Memoryland name already exists");
         
         oldMemoryland.Name = editNameDto.NewName;
