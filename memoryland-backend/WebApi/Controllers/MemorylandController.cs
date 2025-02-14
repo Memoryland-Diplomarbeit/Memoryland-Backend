@@ -65,9 +65,8 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("{id:int}")]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland(int id, [FromQuery] string token)
+    public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland([FromQuery] string token)
     {
         if (string.IsNullOrWhiteSpace(token) || !Guid.TryParse(token, out var guidToken))
             return TypedResults.Unauthorized();
@@ -81,7 +80,7 @@ public class MemorylandController : ApiControllerBase
             .Include(m => m.MemorylandType)
             .Include(m => m.MemorylandConfigurations)
             .Include(m => m.MemorylandTokens)
-            .FirstOrDefault(m => m.Id == id);
+            .FirstOrDefault(m => m.MemorylandTokens.Any(c => c.Token.ToString() == token));
         
         if (memoryland == null)
             return TypedResults.NotFound();
