@@ -146,6 +146,7 @@ public class MemorylandController : ApiControllerBase
         
         var memorylandConfigDtos = memoryland.MemorylandConfigurations
             .Select(mc => new MemorylandConfigurationDataDto(
+                mc.Id,
                 mc.Position,
                 new PhotoDataDto(mc.Photo.Id, mc.Photo.Name)));
         
