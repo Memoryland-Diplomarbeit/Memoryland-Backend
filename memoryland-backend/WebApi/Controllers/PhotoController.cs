@@ -151,7 +151,7 @@ public class PhotoController : ApiControllerBase
             return TypedResults.BadRequest("A FileName name can't be longer than 63 characters or shorter than 3");
         
         // check if the album name doesn't contain invalid characters
-        if (!UploadController.ContainerNameRegex.IsMatch(editNameDto.NewName))
+        if (UploadController.ContainerNameRegex.IsMatch(editNameDto.NewName))
             return TypedResults.BadRequest("FileName name contains invalid characters");
         
         // check if the album name is unique
