@@ -129,6 +129,33 @@ namespace Persistence.Migrations
                 });
 
             migrationBuilder.CreateTable(
+                name: "Transactions",
+                columns: table => new
+                {
+                    Id = table.Column<long>(type: "bigint", nullable: false)
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
+                    PhotoAlbumPath = table.Column<string>(type: "text", nullable: false),
+                    PhotoAlbumId = table.Column<long>(type: "bigint", nullable: false),
+                    UserId = table.Column<long>(type: "bigint", nullable: false)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_Transactions", x => x.Id);
+                    table.ForeignKey(
+                        name: "FK_Transactions_PhotoAlbums_PhotoAlbumId",
+                        column: x => x.PhotoAlbumId,
+                        principalTable: "PhotoAlbums",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                    table.ForeignKey(
+                        name: "FK_Transactions_Users_UserId",
+                        column: x => x.UserId,
+                        principalTable: "Users",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Cascade);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "MemorylandConfigurations",
                 columns: table => new
                 {
@@ -233,6 +260,17 @@ namespace Persistence.Migrations
                 column: "PhotoAlbumId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Transactions_PhotoAlbumId",
+                table: "Transactions",
+                column: "PhotoAlbumId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Transactions_UserId",
+                table: "Transactions",
+                column: "UserId",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Users_Email",
                 table: "Users",
                 column: "Email",
@@ -247,6 +285,9 @@ namespace Persistence.Migrations
 
             migrationBuilder.DropTable(
                 name: "MemorylandTokens");
+
+            migrationBuilder.DropTable(
+                name: "Transactions");
 
             migrationBuilder.DropTable(
                 name: "Photos");

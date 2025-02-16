@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250213203811_Initial")]
+    [Migration("20250216163448_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -194,6 +194,34 @@ namespace Persistence.Migrations
                     b.ToTable("PhotoAlbums");
                 });
 
+            modelBuilder.Entity("Core.Entities.Transaction", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<long>("Id"));
+
+                    b.Property<long>("PhotoAlbumId")
+                        .HasColumnType("bigint");
+
+                    b.Property<string>("PhotoAlbumPath")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<long>("UserId")
+                        .HasColumnType("bigint");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PhotoAlbumId");
+
+                    b.HasIndex("UserId")
+                        .IsUnique();
+
+                    b.ToTable("Transactions");
+                });
+
             modelBuilder.Entity("Core.Entities.User", b =>
                 {
                     b.Property<long>("Id")
@@ -287,6 +315,25 @@ namespace Persistence.Migrations
                         .HasForeignKey("UserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("Core.Entities.Transaction", b =>
+                {
+                    b.HasOne("Core.Entities.PhotoAlbum", "PhotoAlbum")
+                        .WithMany()
+                        .HasForeignKey("PhotoAlbumId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Core.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("PhotoAlbum");
 
                     b.Navigation("User");
                 });

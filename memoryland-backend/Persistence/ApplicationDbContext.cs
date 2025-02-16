@@ -17,6 +17,7 @@ public class ApplicationDbContext : DbContext
     public DbSet<MemorylandToken> MemorylandTokens { get; set; }
     public DbSet<MemorylandType> MemorylandTypes { get; set; }
     public DbSet<MemorylandConfiguration> MemorylandConfigurations { get; set; }
+    public DbSet<Transaction> Transactions { get; set; }
     
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
