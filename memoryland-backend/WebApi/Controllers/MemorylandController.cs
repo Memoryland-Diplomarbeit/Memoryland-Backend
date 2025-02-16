@@ -280,7 +280,7 @@ public class MemorylandController : ApiControllerBase
     [Authorize]
     [Route("{memorylandId:long}")]
     [RequiredScope("backend.write")]
-    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemoryland(
+    public async Task<Results<Created, BadRequest<string>, UnauthorizedHttpResult>> CreateMemorylandConfig(
         long memorylandId, 
         [FromBody] PostMemorylandConfigDto postConfDto)
     {
