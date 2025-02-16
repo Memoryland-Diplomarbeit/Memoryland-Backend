@@ -53,7 +53,7 @@ public class PhotoAlbumController : ApiControllerBase
         // check if the photo exists and if the user is the owner
         var photoAlbum = await Context.PhotoAlbums
             .Include(p => p.Photos)
-            .FirstOrDefaultAsync(p => p.Id == albumId);
+            .FirstOrDefaultAsync(p => p.Id == albumId && p.UserId == user.Id);
 
         if (photoAlbum == null || photoAlbum.Photos.Count == 0) 
             return TypedResults.NotFound();

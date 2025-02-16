@@ -58,7 +58,9 @@ public class UploadController : ApiControllerBase
             return TypedResults.Unauthorized();
         
         // check if the photo album exists
-        if (!Context.PhotoAlbums.Any(pa => pa.Id == photoDto.PhotoAlbumId))
+        if (!Context.PhotoAlbums.Any(pa => 
+                pa.Id == photoDto.PhotoAlbumId &&
+                pa.UserId == user.Id))
             return TypedResults.BadRequest("The photo album doesn't exist.");
         
         // check if the photo is empty
@@ -81,15 +83,11 @@ public class UploadController : ApiControllerBase
             .Include(p => p.PhotoAlbum)
             .FirstOrDefault(p =>
                 p.Name == photoDto.FileName &&
-                p.PhotoAlbumId == photoDto.PhotoAlbumId);
-
-        if (dbPhoto != null)
-        {
-            return TypedResults.BadRequest(
-                !dbPhoto.PhotoAlbum.UserId.Equals(user.Id) ? 
-                    "The photo album doesn't exist." : // unauthorized
-                    "FileName name already exists");
-        }
+                p.PhotoAlbumId == photoDto.PhotoAlbumId &&
+                p.PhotoAlbum.UserId == user.Id);
+        
+        if (dbPhoto != null) 
+            return TypedResults.BadRequest("FileName name already exists");
         
         // convert the photo to a byte array
         byte[] photoData;
