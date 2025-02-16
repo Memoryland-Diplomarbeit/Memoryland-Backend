@@ -36,14 +36,14 @@ public class MemorylandController : ApiControllerBase
     [Route("all")]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<Ok<List<MemorylandInfoDto>>, UnauthorizedHttpResult>> GetAllMemorylands()
+    public async Task<Ok<List<MemorylandInfoDto>>> GetAllMemorylands()
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
         
         // check if the user exists
         if (user == null)
-            return TypedResults.Unauthorized();
+            return TypedResults.Ok(new List<MemorylandInfoDto>());
         
         // check if there are any memorylands at all, for performance
         if (!Context.Memorylands.Any()) 
@@ -119,10 +119,10 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("{id:int}/configuration")]
+    [Route("{id:long}/configuration")]
     [Authorize]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDataDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(int id)
+    public async Task<Results<NotFound, Ok<List<MemorylandConfigurationDataDto>>, UnauthorizedHttpResult>> GetMemorylandConfig(long id)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -161,10 +161,10 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("{id:int}/token/{isPublic:bool?}")]
+    [Route("{id:long}/token/{isPublic:bool?}")]
     [Authorize]
     [RequiredScope("backend.write", "backend.read")]
-    public async Task<Results<NotFound, Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(int id, bool isPublic = false)
+    public async Task<Results<NotFound, Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(long id, bool isPublic = false)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);

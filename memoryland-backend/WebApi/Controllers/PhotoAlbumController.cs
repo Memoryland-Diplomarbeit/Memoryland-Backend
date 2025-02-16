@@ -31,7 +31,7 @@ public class PhotoAlbumController : ApiControllerBase
     #region Get-Endpoints
     
     [HttpGet]
-    [Route("{albumId:int}")]
+    [Route("{albumId:long}")]
     [Authorize]
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<IEnumerable<PhotoDto>>, UnauthorizedHttpResult>> GetPhotoAlbumImagesWithDetails(long albumId)

@@ -29,7 +29,7 @@ public class PhotoController : ApiControllerBase
     #region Get-Endpoints
     
     [HttpGet]
-    [Route("{albumId:int}/{photoName}")]
+    [Route("{albumId:long}/{photoName}")]
     [Authorize]
     [RequiredScope("backend.read")]
     public async Task<Results<NotFound, Ok<PhotoDto>, BadRequest<string>, UnauthorizedHttpResult>> GetImageWithDetails(
