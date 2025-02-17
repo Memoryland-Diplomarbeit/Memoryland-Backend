@@ -10,9 +10,6 @@ public class User : BaseEntity
     [Required, MaxLength(50)]
     public string Email { get; set; }
     
-    [Required, MaxLength(50)]
-    public string Username { get; set; }
-    
     public ICollection<PhotoAlbum> PhotoAlbums { get; set; }
     
     public ICollection<Memoryland> Memorylands { get; set; }

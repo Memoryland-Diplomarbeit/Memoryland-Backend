@@ -44,7 +44,6 @@ public class UserService
         user = new User
         {
             Email = email,
-            Username = username,
             PhotoAlbums = new HashSet<PhotoAlbum>(),
             Memorylands = new HashSet<Memoryland>()
         };

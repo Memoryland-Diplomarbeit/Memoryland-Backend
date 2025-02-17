@@ -32,8 +32,7 @@ namespace Persistence.Migrations
                 {
                     Id = table.Column<long>(type: "bigint", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
-                    Username = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
+                    Email = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false)
                 },
                 constraints: table =>
                 {
