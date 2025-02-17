@@ -12,7 +12,7 @@ using Persistence;
 namespace Persistence.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20250217102326_Initial")]
+    [Migration("20250217121433_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -204,10 +204,6 @@ namespace Persistence.Migrations
 
                     b.Property<long>("PhotoAlbumId")
                         .HasColumnType("bigint");
-
-                    b.Property<string>("PhotoAlbumPath")
-                        .IsRequired()
-                        .HasColumnType("text");
 
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");

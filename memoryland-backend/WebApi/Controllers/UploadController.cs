@@ -77,8 +77,7 @@ public class UploadController : ApiControllerBase
                     t.PhotoAlbum.Name, 
                     t.PhotoAlbum.Photos
                         .Select(p => 
-                            new PhotoDataDto(p.Id, p.Name))),
-                t.PhotoAlbumPath));
+                            new PhotoDataDto(p.Id, p.Name)))));
             
         return TypedResults.Ok(await transactionDtos.ToListAsync());
     }
@@ -200,7 +199,6 @@ public class UploadController : ApiControllerBase
 
         var transaction = new Transaction
         {
-            PhotoAlbumPath = postTransactionDto.SrcAlbumPath,
             PhotoAlbumId = postTransactionDto.DestAlbumId,
             UserId = user.Id
         };

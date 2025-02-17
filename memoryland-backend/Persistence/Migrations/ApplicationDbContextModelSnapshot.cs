@@ -202,10 +202,6 @@ namespace Persistence.Migrations
                     b.Property<long>("PhotoAlbumId")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("PhotoAlbumPath")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<long>("UserId")
                         .HasColumnType("bigint");
 

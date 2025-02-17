@@ -7,9 +7,6 @@ namespace Core.Entities;
 [Index(nameof(UserId), IsUnique = true)]
 public class Transaction : BaseEntity
 {
-    [Required]
-    public string PhotoAlbumPath { get; set; }
-    
     public PhotoAlbum PhotoAlbum { get; set; }
     
     public long PhotoAlbumId { get; set; }
