@@ -192,10 +192,6 @@ public class UploadController : ApiControllerBase
         
         if (album is null)
             return TypedResults.BadRequest("PhotoAlbum does not exist");
-        
-        // check if the path is valid
-        if (string.IsNullOrWhiteSpace(postTransactionDto.SrcAlbumPath))
-            return TypedResults.BadRequest("Path is invalid");
 
         var transaction = new Transaction
         {
