@@ -161,10 +161,10 @@ public class MemorylandController : ApiControllerBase
     }
     
     [HttpGet]
-    [Route("{id:long}/token/{isPublic:bool?}")]
+    [Route("{id:long}/token")]
     [Authorize]
     [RequiredScope("backend.write", "backend.read")]
-    public async Task<Results<NotFound, Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(long id, bool isPublic = false)
+    public async Task<Results<Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GetTokenForMemoryland(long id)
     {
         // check if the user is authenticated without errors
         var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
@@ -175,7 +175,7 @@ public class MemorylandController : ApiControllerBase
         
         // check if there are any memorylands at all, for performance
         if (!Context.Memorylands.Any()) 
-            return TypedResults.NotFound();
+            return TypedResults.BadRequest("Memoryland does not exist");
         
         // check if the memoryland exists and if the user is the owner
         var memoryland = Context.Memorylands
@@ -184,33 +184,26 @@ public class MemorylandController : ApiControllerBase
             .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
 
         if (memoryland == null)
-            return TypedResults.NotFound();
+            return TypedResults.BadRequest("Memoryland does not exist");
         
         // Generate new token and delete old one
         var memorylandToken = Context.MemorylandTokens
-            .FirstOrDefault(mt => 
-                mt.MemorylandId == memoryland.Id &&
-                mt.IsInternal != isPublic);
+            .FirstOrDefault(mt => mt.MemorylandId == memoryland.Id);
 
-        if (memorylandToken != null)
+        if (memorylandToken == null)
         {
-            Context.MemorylandTokens.Remove(memorylandToken);
+            memorylandToken = new MemorylandToken
+            {
+                MemorylandId = memoryland.Id
+            };
+
+            await Context.MemorylandTokens.AddAsync(memorylandToken);
             await Context.SaveChangesAsync();
         }
-
-        memorylandToken = new MemorylandToken
-        {
-            IsInternal = !isPublic,
-            MemorylandId = memoryland.Id
-        };
-
-        await Context.MemorylandTokens.AddAsync(memorylandToken);
-        await Context.SaveChangesAsync();
         
         // Retrieve Token
         var token = new TokenDto(
-            memorylandToken.Token.ToString(), 
-            isPublic);
+            memorylandToken.Token.ToString());
         
         // Set security headers
         // -> not cached
@@ -333,6 +326,67 @@ public class MemorylandController : ApiControllerBase
         await Context.SaveChangesAsync();
         
         return TypedResults.Created();
+    }
+    
+    [HttpPost]
+    [Route("{id:long}/token")]
+    [Authorize]
+    [RequiredScope("backend.write", "backend.read")]
+    public async Task<Results<Ok<TokenDto>, BadRequest<string>, UnauthorizedHttpResult>> GenerateNewTokenForMemoryland(long id)
+    {
+        // check if the user is authenticated without errors
+        var user = await UserSvc.CheckIfUserAuthenticated(User.Claims);
+        
+        // check if the user exists
+        if (user == null)
+            return TypedResults.Unauthorized();
+        
+        // check if there are any memorylands at all, for performance
+        if (!Context.Memorylands.Any()) 
+            return TypedResults.BadRequest("Memoryland does not exist");
+        
+        // check if the memoryland exists and if the user is the owner
+        var memoryland = Context.Memorylands
+            .Include(m => m.User)
+            .Include(m => m.MemorylandType)
+            .FirstOrDefault(m => m.Id == id && m.UserId == user.Id);
+
+        if (memoryland == null)
+            return TypedResults.BadRequest("Memoryland does not exist");
+        
+        // Generate new token and delete old one
+        var memorylandToken = Context.MemorylandTokens
+            .FirstOrDefault(mt => mt.MemorylandId == memoryland.Id);
+
+        if (memorylandToken != null)
+        {
+            Context.MemorylandTokens.Remove(memorylandToken);
+            await Context.SaveChangesAsync();
+        }
+        
+        memorylandToken = new MemorylandToken
+        {
+            MemorylandId = memoryland.Id
+        };
+
+        await Context.MemorylandTokens.AddAsync(memorylandToken);
+        await Context.SaveChangesAsync();
+        
+        // Retrieve Token
+        var token = new TokenDto(
+            memorylandToken.Token.ToString());
+        
+        // Set security headers
+        // -> not cached
+        // -> not stored
+        // -> disappear from the browser immediately once the tab is closed
+        Response.Headers.CacheControl = "no-store, no-cache";
+        Response.Headers.Expires = "0";
+
+        if (string.IsNullOrWhiteSpace(token.Token))
+            return TypedResults.BadRequest("Token could not be retrieved.");
+        
+        return TypedResults.Ok(token);
     }
     
     #endregion
