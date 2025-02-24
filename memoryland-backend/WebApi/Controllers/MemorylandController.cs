@@ -66,14 +66,14 @@ public class MemorylandController : ApiControllerBase
     
     [HttpGet]
     [RequiredScope("backend.read")]
-    public async Task<Results<NotFound, Ok<MemorylandDto>, UnauthorizedHttpResult>> GetCompleteMemoryland([FromQuery] string token)
+    public async Task<Results<Ok<MemorylandDto>, BadRequest<string>, UnauthorizedHttpResult>> GetCompleteMemoryland([FromQuery] string token)
     {
         if (string.IsNullOrWhiteSpace(token) || !Guid.TryParse(token, out var guidToken))
             return TypedResults.Unauthorized();
         
         // check if there are any memorylands at all, for performance
         if (!Context.Memorylands.Any()) 
-            return TypedResults.NotFound();
+            return TypedResults.BadRequest("Memoryland does not exist.");
         
         var memoryland = Context.Memorylands
             .Include(m => m.User)
@@ -83,7 +83,7 @@ public class MemorylandController : ApiControllerBase
             .FirstOrDefault(m => m.MemorylandTokens.Any(c => c.Token.ToString() == token));
         
         if (memoryland == null)
-            return TypedResults.NotFound();
+            return TypedResults.BadRequest("Token not valid anymore.");
         
         var memorylandToken = memoryland.MemorylandTokens
             .FirstOrDefault(mt => mt.Token.Equals(guidToken));
