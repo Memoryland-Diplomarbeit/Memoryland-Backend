@@ -71,6 +71,7 @@ jobs:
     permissions:
       id-token: write #This is required for requesting the JWT
       contents: read #This is required for actions/checkout
+      actions: write
 
     steps:
       - name: Download artifact from build job
@@ -91,7 +92,7 @@ jobs:
         with:
           app-name: 'app-memoryland'
           slot-name: 'Production'
-          package: ./error-inducing-path-for-test
+          package: .
 
       - name: Delete artifact after deployment
         if: always()
