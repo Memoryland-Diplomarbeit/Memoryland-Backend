@@ -18,22 +18,49 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
+      - name: Create appsettings.json
+        run: |
+          cat <<EOL > memoryland-backend/WebApi/appsettings.json
+          {
+            "Logging": {
+              "LogLevel": {
+                "Default": "Information",
+                "Microsoft.AspNetCore": "Warning"
+              }
+            },
+            "AllowedHosts": "*",
+            "UseLocalDb": false,
+            "ConnectionStrings": {
+              "BlobStorageDefault": "${{ secrets.BLOB_STORAGE_CONNECTION_STRING }}",
+              "Default": "${{ secrets.POSTGRES_CONNECTION_STRING }}"
+            },
+            "AzureAdB2C": {
+              "Instance": "${{ secrets.AD_B2C_INSTANCE }}",
+              "ClientId": "${{ secrets.AD_B2C_CLIENT_ID }}",
+              "Domain": "${{ secrets.AD_B2C_DOMAIN }}",
+              "SignedOutCallbackPath": "${{ secrets.AD_B2C_SIGNED_OUT_CALLBACK_PATH }}",
+              "SignUpSignInPolicyId": "${{ secrets.AD_B2C_SIGN_UP_SIGN_IN_POLICY_ID }}",
+            }
+          }
+          EOL
+        shell: bash
+
       - name: Set up .NET Core
         uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '8.x'
 
       - name: Build with dotnet
-        run: dotnet build --configuration Release
+        run: dotnet build memoryland-backend/WebApi/WebApi.csproj --configuration Release
 
       - name: dotnet publish
-        run: dotnet publish -c Release -o "${{env.DOTNET_ROOT}}/myapp"
+        run: dotnet publish memoryland-backend/WebApi/WebApi.csproj -c Release -o "${{github.workspace}}/myapp"
 
       - name: Upload artifact for deployment job
         uses: actions/upload-artifact@v4
         with:
           name: .net-app
-          path: ${{env.DOTNET_ROOT}}/myapp
+          path: ${{github.workspace}}/myapp
 
   deploy:
     runs-on: windows-latest
@@ -64,5 +91,5 @@ jobs:
         with:
           app-name: 'app-memoryland'
           slot-name: 'Production'
-          package: .
+          package: $${{github.workspace}}/myapp
           
