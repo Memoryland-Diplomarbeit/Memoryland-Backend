@@ -91,5 +91,10 @@ jobs:
         with:
           app-name: 'app-memoryland'
           slot-name: 'Production'
-          package: $${{github.workspace}}/myapp
-          
+          package: ./error-inducing-path-for-test
+
+      - name: Delete artifact after deployment
+        if: always()
+        uses: geekyeggo/delete-artifact@v4
+        with:
+          name: .net-app
